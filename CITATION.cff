@@ -30,11 +30,10 @@ date-released: "2026-10-19"
 license: MIT
 
 authors:
-  # 取自本机 git 配置（user.name）。想用真名或中文名，直接改这里即可；
-  # 姓 / 名分开写可获得更好的自动排版：
+  # 署名与软件「关于」页一致。要换成真名或拆成姓/名，直接改这里：
   #   - family-names: "凌"
   #     given-names: "锋"
-  - name: "lingfengsh"
+  - name: "零 & AI"
 
 # 若你有 ORCID，取消注释并填写（格式：https://orcid.org/0000-0000-0000-0000）
 #  - name: "零"

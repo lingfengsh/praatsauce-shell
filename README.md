@@ -284,10 +284,11 @@ GUI 相关的部分靠手工验收。
 ```bibtex
 @software{praatsauce_shell,
   title  = {PraatSauce 助手：面向中文用户的语音声学参数提取工作台},
-  author = {lingfengsh},
+  author = {零 \& AI},
   year   = {2026},
   version= {1.2},
-  note   = {MIT License}
+  note   = {MIT License},
+  url    = {https://github.com/lingfengsh/praatsauce-shell}
 }
 
 @software{praatsauce,
