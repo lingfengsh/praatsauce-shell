@@ -4,6 +4,13 @@
 > **所有声学参数都由你本机的 [Praat](https://praat.org) 计算**，本程序只负责选文件、配参数、
 > 批量调度、展示与审核结果。
 
+源码仓库：<https://github.com/lingfengsh/praatsauce-shell>
+（`praat.exe` 不随仓库分发，配置方法见下文「准备 Praat」。）
+
+<!-- 拿到 Zenodo DOI 后，把下面这段取消注释并替换 XXXX：
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+-->
+
 <p align="center">
   <img src="docs/screenshots/step1.png" width="820" alt="第一步：选择声音文件">
 </p>
