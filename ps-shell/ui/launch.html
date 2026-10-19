@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PraatSauce 助手 · 选择界面</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    background: linear-gradient(135deg, #eef1f6 0%, #e3e8f0 100%);
+    color: #1f2733; display: flex; align-items: center; justify-content: center;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { width: min(880px, 92vw); }
+  .head { text-align: center; margin-bottom: 28px; }
+  .head h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: .5px; }
+  .head p { margin: 0; color: #5b6776; font-size: 14px; }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .card {
+    background: #fff; border-radius: 16px; padding: 26px 24px; cursor: pointer;
+    border: 2px solid transparent; box-shadow: 0 8px 24px rgba(30,50,90,.08);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 14px 32px rgba(30,50,90,.14); }
+  .card.selected { border-color: #3b6ef0; }
+  .card .badge {
+    width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center;
+    justify-content: center; font-size: 22px; color: #fff;
+  }
+  .card.wizard .badge { background: linear-gradient(135deg,#3b6ef0,#5b8def); }
+  .card.vs .badge { background: linear-gradient(135deg,#e07b39,#f0a04b); }
+  .card h2 { margin: 0; font-size: 19px; }
+  .card ul { margin: 0; padding-left: 18px; color: #5b6776; font-size: 13px; line-height: 1.7; }
+  .card .go {
+    margin-top: auto; align-self: flex-start; font-size: 13px; color: #3b6ef0; font-weight: 600;
+  }
+  .card.vs .go { color: #e07b39; }
+  .foot { margin-top: 22px; display: flex; align-items: center; justify-content: center; gap: 10px; color: #5b6776; font-size: 13px; }
+  .foot input { width: 16px; height: 16px; }
+  .auto { text-align:center; color:#8a94a3; font-size:12px; margin-top:10px; min-height:16px; }
+  .hint { position: fixed; bottom: 14px; width: 100%; text-align: center; color: #9aa4b2; font-size: 12px; }
+  .fb-float { position: fixed; top: 14px; right: 16px; font-size: 13px; color: #3b6ef0; text-decoration: none; font-weight: 600; }
+  .fb-float:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+  <a id="launchFeedback" class="fb-float" href="#">反馈意见</a>
+  <div class="wrap">
+    <div class="head">
+      <h1>PraatSauce 助手</h1>
+      <p>计算全部由本机 Praat 完成，这个程序只是个外壳。请选择你习惯的界面：</p>
+    </div>
+    <div class="cards">
+      <div class="card wizard" data-mode="wizard">
+        <div class="badge">✦</div>
+        <h2>向导版</h2>
+        <ul>
+          <li>三步向导：选音频 → 选要测什么 → 批量（运行前可一键试跑一个样本查验参数）</li>
+          <li>内置体检卡、容错、发音人档案、结果质检</li>
+          <li>适合新手与需要把关质量的场景</li>
+        </ul>
+        <div class="go">进入向导版 →</div>
+      </div>
+      <div class="card vs" data-mode="vs">
+        <div class="badge">▦</div>
+        <h2>VoiceSauce 风格</h2>
+        <ul>
+          <li>复刻 VS 八按钮命令栏与参数提取对话框</li>
+          <li>熟悉 VS 的老用户零学习成本</li>
+          <li>底层仍是 Praat 引擎，免 MATLAB Runtime</li>
+        </ul>
+        <div class="go">进入 VoiceSauce 风格 →</div>
+      </div>
+    </div>
+    <div class="foot">
+      <input type="checkbox" id="remember">
+      <label for="remember">记住我的选择，下次直接打开</label>
+    </div>
+    <div class="auto" id="auto"></div>
+  </div>
+  <div class="hint">随时可在任一界面右上角「切换界面」回到这里</div>
+
+<script src="ui/feedback.js"></script>
+<script>
+  var remembered = null;
+  // 原生窗口保活：页面一加载就发一次心跳，避免 app.py 的 15 秒超时误判为“无响应”而退回浏览器
+  fetch('/api/ping');
+  document.getElementById('launchFeedback').addEventListener('click', function(e){
+    e.preventDefault();
+    if (window.openFeedback) window.openFeedback();
+  });
+  function choose(mode) {
+    var remember = document.getElementById('remember').checked;
+    fetch('/api/settings', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ uiMode: mode, rememberUi: remember })
+    }).then(function(){
+      location.href = (mode === 'vs') ? '/vs.html' : '/index.html';
+    });
+  }
+  function select(mode) {
+    document.querySelectorAll('.card').forEach(function(c){ c.classList.remove('selected'); });
+    document.querySelector('.card[data-mode="'+mode+'"]').classList.add('selected');
+  }
+  document.querySelectorAll('.card').forEach(function(c){
+    c.addEventListener('click', function(){ choose(c.getAttribute('data-mode')); });
+  });
+  document.getElementById('remember').addEventListener('change', function(e){
+    // 选中“记住”时，若已选定模式则同步保存
+    var sel = document.querySelector('.card.selected');
+    if (e.target.checked && sel) {
+      fetch('/api/settings', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ rememberUi: true }) });
+    }
+  });
+  // 若已记住选择，预选并短暂自动跳转
+  fetch('/api/bootstrap').then(function(r){ return r.json(); }).then(function(b){
+    var s = (b && b.settings) || {};
+    if (s.uiMode === 'vs' || s.uiMode === 'wizard') {
+      select(s.uiMode);
+      document.getElementById('remember').checked = !!s.rememberUi;
+      if (s.rememberUi) {
+        var el = document.getElementById('auto');
+        var n = 1;
+        el.textContent = '已记住上次选择，' + n + ' 秒后自动打开…（点任意卡片可取消）';
+        var t = setInterval(function(){
+          n++;
+          if (n > 1) { clearInterval(t); location.href = (s.uiMode === 'vs') ? '/vs.html' : '/index.html'; }
+        }, 1000);
+        document.querySelector('.cards').addEventListener('click', function(){ clearInterval(t); el.textContent=''; }, { once:true });
+      }
+    }
+  }).catch(function(){});
+</script>
+</body>
+</html>

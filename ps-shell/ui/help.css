@@ -1,0 +1,202 @@
+/* PraatSauce 助手 —— 点击式帮助样式
+ *
+ * 单独成文件，因为向导版（styles.css）和 VoiceSauce 版（vs.css）是两套
+ * 互不兼容的皮肤；帮助面板要在两边长得一样，就不能依赖任何一方的变量。
+ * 颜色全部写死，只依赖浏览器基础能力。
+ */
+
+/* 进入帮助模式：整页鼠标变问号。
+   面板与指示条自己恢复常规指针，否则按钮点起来很怪。 */
+body.ps-help-on,
+body.ps-help-on * { cursor: help !important; }
+
+body.ps-help-on #psHelpPanel,
+body.ps-help-on #psHelpPanel *,
+body.ps-help-on #psHelpBadge,
+body.ps-help-on #psHelpBadge * { cursor: auto !important; }
+
+body.ps-help-on #psHelpPanel button,
+body.ps-help-on #psHelpPanel [role="button"],
+body.ps-help-on #psHelpBadge button { cursor: pointer !important; }
+
+/* 当前会被解释的元素：只在帮助模式里出现虚线框 */
+.ps-help-target {
+  outline: 2px dashed #2563eb !important;
+  outline-offset: 2px !important;
+  border-radius: 5px;
+  box-shadow: 0 0 0 5px rgba(37, 99, 235, .07) !important;
+}
+
+/* ---------- 帮助模式指示条 ---------- */
+.ps-help-badge {
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+  z-index: 190; display: flex; align-items: center; gap: 9px;
+  padding: 7px 9px 7px 12px; border-radius: 999px;
+  background: #1f2937; color: #f9fafb;
+  font-size: 12.5px; line-height: 1; white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .28);
+  animation: ps-help-rise .16s ease-out;
+}
+.ps-help-badge-dot {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #2563eb; color: #fff; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.ps-help-badge-x {
+  border: 1px solid rgba(255,255,255,.26); background: transparent; color: #f9fafb;
+  border-radius: 999px; padding: 3px 9px; font-size: 11.5px;
+}
+.ps-help-badge-x:hover { background: rgba(255,255,255,.12); }
+
+@keyframes ps-help-rise {
+  from { opacity: 0; transform: translate(-50%, 6px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ---------- 说明面板 ---------- */
+.ps-help-panel {
+  position: fixed; z-index: 200;
+  width: 390px; max-width: calc(100vw - 24px);
+  max-height: min(72vh, 580px);
+  display: flex; flex-direction: column;
+  background: #fff; border: 1px solid #e4e7ec;
+  border-radius: 12px; box-shadow: 0 18px 44px rgba(15, 23, 42, .22);
+  opacity: 0; transform: translateY(4px);
+  transition: opacity .12s ease, transform .12s ease;
+  overflow: hidden;
+  color: #1f2937; text-align: left;
+  font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei UI", "PingFang SC", sans-serif;
+  font-size: 13px; line-height: 1.6;
+}
+.ps-help-panel.ps-help-in { opacity: 1; transform: translateY(0); }
+
+.ps-help-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px 0 14px;
+}
+.ps-help-group {
+  font-size: 11px; font-weight: 600; letter-spacing: .02em;
+  color: #2563eb; background: #eff6ff;
+  border-radius: 999px; padding: 2px 9px;
+}
+.ps-help-x {
+  margin-left: auto; border: 0; background: transparent;
+  color: #6b7280; font-size: 14px; line-height: 1;
+  padding: 4px 6px; border-radius: 6px;
+}
+.ps-help-x:hover { background: #f3f4f6; color: #1f2937; }
+
+.ps-help-title {
+  margin: 7px 0 0; padding: 0 14px;
+  font-size: 16px; font-weight: 650; color: #1f2937;
+  letter-spacing: -.01em;
+}
+
+.ps-help-scroll {
+  padding: 8px 14px 4px;
+  overflow-y: auto; overscroll-behavior: contain;
+  flex: 1 1 auto; min-height: 0;
+}
+.ps-help-body { font-size: 13px; line-height: 1.68; color: #4b5563; }
+.ps-help-body b { color: #1f2937; }
+.ps-help-body code {
+  font-family: "Cascadia Mono", Consolas, "SFMono-Regular", Menlo, monospace;
+  font-size: 12px;
+  background: #f3f4f6; padding: 1px 4px; border-radius: 4px;
+}
+
+.ps-help-block {
+  margin-top: 10px; padding: 9px 11px;
+  background: #f8fafc; border-left: 3px solid #93c5fd; border-radius: 0 7px 7px 0;
+}
+.ps-help-block-h {
+  font-size: 11.5px; font-weight: 700; color: #1d4ed8;
+  letter-spacing: .04em; margin-bottom: 3px;
+}
+.ps-help-block ul { margin: 0; padding-left: 17px; }
+.ps-help-block li { font-size: 12.5px; line-height: 1.62; color: #4b5563; }
+.ps-help-block li + li { margin-top: 4px; }
+
+.ps-help-warn {
+  margin-top: 10px; padding: 8px 11px;
+  background: #fffbeb; border-left: 3px solid #f59e0b;
+  border-radius: 0 7px 7px 0;
+  font-size: 12.5px; line-height: 1.62; color: #92400e;
+}
+.ps-help-warn > b:first-child { display: block; font-size: 11.5px; margin-bottom: 2px; }
+
+.ps-help-cite {
+  margin-top: 10px; padding-top: 8px; border-top: 1px dashed #e4e7ec;
+  font-size: 11.5px; line-height: 1.55; color: #6b7280;
+}
+.ps-help-cite > b:first-child { display: block; font-size: 10.5px; letter-spacing: .04em; margin-bottom: 2px; }
+
+.ps-help-foot {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px 10px; border-top: 1px solid #f1f2f4;
+  background: #fcfcfd;
+}
+.ps-help-tip { font-size: 11.5px; color: #6b7280; }
+.ps-help-foot .btn { margin-left: auto; }
+
+/* 顶栏「?」按钮的激活态（向导版与 VS 版共用 id） */
+#btnHelp.active {
+  background: #2563eb !important; border-color: #2563eb !important; color: #fff !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .16);
+}
+
+/* VS 版的 ? 按钮沿用标题栏小按钮的外观 */
+.titlebar button.switch {
+  font-family: inherit; cursor: pointer; line-height: 1.35;
+}
+
+/* 顶栏的「?」在帮助模式下仍应是普通可点指针 */
+body.ps-help-on #btnHelp { cursor: pointer !important; }
+
+/* 向导版的圆形问号：字大一点，视觉重心居中 */
+#btnHelp.help-toggle {
+  font-size: 16px; font-weight: 700; line-height: 1;
+  font-family: inherit; padding: 0;
+}
+
+/* 顶栏右侧不能被「?」挤到换行：这一组永远保持单行、不收缩 */
+.topbar-right { flex: 0 0 auto; }
+.topbar-right > * { flex: 0 0 auto; white-space: nowrap; }
+
+/* 判读速查表（发声态条目里） */
+.ps-help-table-wrap { margin-top: 10px; overflow-x: auto; }
+.ps-help-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 12px; line-height: 1.5;
+}
+.ps-help-table th,
+.ps-help-table td {
+  padding: 4px 6px; text-align: left;
+  border-bottom: 1px solid #eef0f3;
+  white-space: nowrap;
+}
+.ps-help-table th {
+  font-weight: 600; color: #1f2937; background: #f8fafc;
+  border-bottom-color: #e4e7ec;
+}
+.ps-help-table td:first-child { color: #1f2937; font-weight: 500; }
+.ps-help-note {
+  margin-top: 6px; font-size: 11.5px; line-height: 1.5; color: #6b7280;
+}
+
+/* 条目内跳转链接（如 H1–H2 → 判读速查表） */
+.ps-help-link {
+  display: inline-block; margin-top: 5px;
+  color: #2563eb; text-decoration: none; font-weight: 500;
+  border-bottom: 1px solid rgba(37, 99, 235, .3);
+}
+.ps-help-link:hover { border-bottom-color: #2563eb; }
+
+/* VS 标题栏的 ? 与「反馈 / 切换」保持同一套小按钮外观 */
+.titlebar button.switch {
+  color: #000; font-size: 11px; line-height: 1.35;
+  border: 1px solid #8da6c0; background: rgba(255,255,255,.35);
+  padding: 1px 6px; border-radius: 3px;
+  font-family: inherit; cursor: pointer;
+}
+.titlebar button.switch:hover { background: rgba(255,255,255,.6); }

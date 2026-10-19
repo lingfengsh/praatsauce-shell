@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoiceSauce 风格 · PraatSauce 助手</title>
+<link rel="stylesheet" href="ui/vs.css">
+<link rel="stylesheet" href="ui/help.css">
+</head>
+<body>
+
+<!-- VS 主窗口复刻：302×214 比例，八按钮 2×4 网格 -->
+<div class="vs-main">
+  <div class="titlebar">
+    <span class="icon"></span>
+    <strong>VoiceSauce</strong>
+    <span class="spacer"></span>
+    <a class="switch" id="vsFeedback" role="button" title="意见反馈 / 报 bug（在浏览器中打开收集表）">反馈</a>
+    <a class="switch" href="/launch.html" title="切换界面">切换</a>
+    <button type="button" class="switch" id="btnHelp" aria-label="帮助模式：点开后点击界面任意处查看说明" aria-pressed="false">?</button>
+  </div>
+
+  <nav class="cmdbar">
+    <button data-act="extract" data-help="step2">Parameter Estimation</button>
+    <button data-act="display" data-help="step4">Parameter Display</button>
+    <button data-act="export" data-help="step5">Output to Text</button>
+    <button data-act="emu" data-help="step5" disabled title="需 Emu 语音库，暂不支持">Output to EMU</button>
+    <button data-act="adjust" data-help="detail">Manual Data</button>
+    <button data-act="settings" data-help="settings">Settings</button>
+    <button data-act="about" data-help="app">About...</button>
+    <button data-act="quit" class="danger" data-help="app">Exit</button>
+  </nav>
+
+  <div class="vs-footer"><span>VoiceSauce</span></div>
+</div>
+
+<!-- ================= 参数提取 ================= -->
+<div class="mask" id="mExtract" data-help-scope="step2">
+  <div class="modal wide">
+    <header><h3>参数提取</h3><span class="x" data-close>✕</span></header>
+    <div class="body">
+      <label class="fld">Input (*.wav) directory:</label>
+      <div class="row">
+        <input type="text" id="exDir" placeholder="例如 C:\Users\me\recordings">
+        <button class="btn" id="exBrowse">Browse...</button>
+      </div>
+      <div class="hint">定位路径后，下方列表框会列出当前文件夹中的波形文件。</div>
+      <div class="listbox" id="exFileList"><div style="color:#9aa4b2">请先选择目录。</div></div>
+      <canvas id="exWave" class="wave" width="760" height="120"></canvas>
+      <div class="hint" id="exWaveHint" style="display:none">勾选上方「显示波形」后，点列表里的任一项即可预览其波形。</div>
+
+      <div class="divider"></div>
+
+      <div class="row">
+        <button class="btn" id="exParamSel">Parameter Selection...</button>
+        <span id="exParamSummary" class="hint"></span>
+      </div>
+
+      <label class="fld" style="margin-top:14px">输出到文本:</label>
+      <div class="row">
+        <input type="text" id="exOutDir" placeholder="结果输出目录（留空=与音频同目录）">
+        <button class="btn" id="exOutBrowse">Browse...</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <input type="text" id="exOutFile" value="out.tsv" style="max-width:200px">
+        <span class="hint">结果文件名（.tsv，Excel/R 可直读）</span>
+      </div>
+
+      <div class="divider"></div>
+      <label class="param-row"><input type="checkbox" id="exResample"> <span>测量前把所有高于 16kHz 的音频降采样到 16kHz（提高速度、减少采样率差异）</span></label>
+      <label class="param-row"><input type="checkbox" id="exUseTG"> <span>使用 Praat TextGrid 标注文件（只测标注区间，默认读第 1 层）</span></label>
+      <div class="row" id="exTierRow" style="display:none;margin:6px 0 0 22px">
+        <span class="hint">读第</span><input type="number" id="exTier" value="1" min="1" style="max-width:60px">
+        <span class="hint">层</span>
+      </div>
+      <label class="param-row"><input type="checkbox" id="exShowWave"> <span>显示波形（勾选后点击列表中的文件可预览波形）</span></label>
+
+      <div id="exMsg" style="margin-top:12px"></div>
+    </div>
+    <footer>
+      <span class="left" id="exStatus"></span>
+      <span class="selcount" id="exSelCount"></span>
+      <button class="btn ghost" id="exStart">Start!</button>
+    </footer>
+  </div>
+</div>
+
+<!-- ================= 参数选择对话框 ================= -->
+<div class="mask" id="mParamSel" data-help-scope="step2">
+  <div class="modal">
+    <header><h3>Parameter Selection</h3><span class="x" data-close>✕</span></header>
+    <div class="body">
+      <div class="hint" style="margin-bottom:8px">列出 VoiceSauce 的可测参数。</div>
+      <div class="param-grid" id="paramGrid"></div>
+    </div>
+    <footer>
+      <span class="left" id="paramCount"></span>
+      <button class="btn primary" data-close>OK</button>
+    </footer>
+  </div>
+</div>
+
+<!-- ================= 参数显示（基于「数据调整」同构布局） ================= -->
+<div class="mask" id="mDisplay" data-help-scope="step4">
+  <div class="modal wide">
+    <header><h3>参数显示</h3><span class="x" data-close>✕</span></header>
+    <div class="body">
+      <div class="adjust-main">
+        <div class="adjust-top">
+          <canvas id="dpChart" width="820" height="320"></canvas>
+        </div>
+        <div class="adjust-side">
+          <div class="legend" style="margin:-4px -4px 8px">测量参数（点选叠加显示）</div>
+          <div id="dpParamList" class="dp-param-list">
+            <div style="color:#9aa4b2">请先在左侧选择 wav 目录。</div>
+          </div>
+        </div>
+      </div>
+      <div class="adjust-grid">
+        <div class="adjust-col">
+          <div class="groupbox compact">
+            <div class="legend">wav file directory</div>
+            <div class="row"><input type="text" id="dpWavDir"><button class="btn" id="dpWavBrowse">Browse...</button></div>
+            <div class="listbox" id="dpFileList"><div style="color:#4b5563">请先选择 wav 目录</div></div>
+            <button class="btn primary" id="dpLoad">加载曲线</button>
+          </div>
+        </div>
+        <div class="adjust-col">
+          <div class="groupbox compact">
+            <div class="legend">显示选项</div>
+            <label class="param-row"><input type="checkbox" id="dpShowSpec"> <span>显示语图（背景）</span></label>
+            <p class="muted small" id="dpSrcNote"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <span class="left" id="dpStatus"></span>
+      <button class="btn" data-close>关闭</button>
+    </footer>
+  </div>
+</div>
+
+<!-- ================= 输出到文本 ================= -->
+<div class="mask" id="mExport" data-help-scope="step5">
+  <div class="modal">
+    <header><h3>输出到文本</h3><span class="x" data-close>✕</span></header>
+    <div class="body">
+      <div id="exResultInfo" class="hint">尚无本次批量结果。请先在「参数提取」中完成一次批量运行。</div>
+      <div class="param-grid" id="exportGrid" style="margin-top:10px"></div>
+      <div class="divider"></div>
+      <label class="param-row"><input type="checkbox" id="exSingle" checked> <span>Single file（合并输出到一个 CSV）</span></label>
+      <div id="exExportMsg" style="margin-top:10px"></div>
+    </div>
+    <footer>
+      <span class="left"></span>
+      <button class="btn primary" id="exDoExport">Start!</button>
+    </footer>
+  </div>
+</div>
+
+<!-- ================= 数据调整：重抽并写盘 Pitch/Formant（复刻 VS Manual Data Input） ================= -->
+<div class="mask" id="mAdjust" data-help-scope="detail">
+  <div class="modal wide">
+    <header><h3>数据调整 (Manual Data Input)</h3><span class="x" data-close>✕</span></header>
+      <div class="body">
+      <div class="adjust-main">
+        <div class="adjust-top">
+          <canvas id="adjChart" width="820" height="180"></canvas>
+        </div>
+        <div class="adjust-side">
+          <div id="adjPitchPanel" class="adj-param-panel">
+            <div class="rg-preview-row">
+              <div class="seg seg-sm" id="adjMethod">
+                <button type="button" class="seg-btn active" data-m="filtered">filtered AC</button>
+                <button type="button" class="seg-btn" data-m="raw">raw AC</button>
+              </div>
+              <span class="rg-preview-status" id="adjPrevStatus"></span>
+            </div>
+            <div class="rg-sliders" id="adjSliders"></div>
+            <p class="muted small" id="adjPitchHint">拉滑块实时预览（橙线）；满意后点「保存 F0」把这套参数记入 measure.json 并重抽 .Pitch 落盘。</p>
+          </div>
+          <div id="adjFormantPanel" class="adj-param-panel hidden">
+            <div class="adj-formant-grid">
+              <label class="fld">共振峰频率上限 (Hz)</label>
+              <input type="number" id="adjMaxF" value="5500" min="3000" max="8000" step="50">
+              <label class="fld">共振峰数量</label>
+              <div class="seg seg-sm" id="adjNFormants">
+                <button type="button" class="seg-btn" data-n="4">4</button>
+                <button type="button" class="seg-btn active" data-n="5">5</button>
+                <button type="button" class="seg-btn" data-n="6">6</button>
+                <button type="button" class="seg-btn" data-n="7">7</button>
+              </div>
+            </div>
+            <div class="row adj-formant-actions">
+              <button class="btn" id="adjSmooth" type="button">平滑 Formant</button>
+            </div>
+            <p class="muted small" id="adjFormantHint">设定上限与数量后点「保存 Formant」重抽 .Formant 落盘。已落盘后点「平滑 Formant」用 Viterbi 轨迹（Track）消除 F2/F3 上下跳、并写回 .Formant。语图窗长只影响显示、不影响抽取。</p>
+          </div>
+        </div>
+      </div>
+      <div class="adjust-grid">
+        <div class="adjust-col">
+          <div class="groupbox compact">
+            <div class="legend">wav file directory</div>
+            <div class="row"><input type="text" id="adjWavDir"><button class="btn" id="adjWavBrowse">Browse...</button></div>
+            <div class="listbox" id="adjFileList"><div style="color:#4b5563">请先选择 wav 目录</div></div>
+            <button class="btn primary" id="adjLoad">加载曲线</button>
+          </div>
+        </div>
+        <div class="adjust-col">
+          <div class="groupbox compact" id="adjDataBox">
+            <div class="legend">Data files (default: measure subfolder)</div>
+            <div class="row adj-data-row">
+              <input type="text" id="adjDataDir" placeholder="音频目录下的 measure/ 子文件夹（默认自动）" title=".Pitch / .Formant / .measure.json 都落在「音频目录/measure/」里；此框只显示路径，实际落盘位置由音频目录决定。">
+              <button class="btn" id="adjDataBrowse">Browse...</button>
+            </div>
+
+            <div class="adj-radio">
+              <label class="radio"><input type="radio" name="adjDim" value="pitch" checked> F0（基频）</label>
+              <label class="radio"><input type="radio" name="adjDim" value="formant"> Formant（共振峰）</label>
+            </div>
+
+            <div class="row adj-save-row">
+              <button class="btn" id="adjShowSpec" type="button">显示语图</button>
+              <button class="btn primary" id="adjApply">保存 F0</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <span class="left">
+        <span id="adjFootNote" class="adj-foot-note muted small" title="点击展开/收起完整说明" data-short="保存即重抽并写盘到「音频目录/measure/」的 .Pitch / .Formant（含 .measure.json）…" data-full="这里直接对单个音频重抽并写盘基频或共振峰对象：选好参数后点「保存」，结果落到「音频目录/measure/」里的 .Pitch / .Formant（并同步写 .measure.json）。之后「参数提取」批量运行读到这些对象就直接复用、不再重算。">保存即重抽并写盘到「音频目录/measure/」的 .Pitch / .Formant（含 .measure.json）…</span>
+        <span id="adjChartLegend" class="adj-legend"></span>
+        <span id="adjStatus"></span>
+      </span>
+      <button class="btn" data-close>关闭</button>
+    </footer>
+  </div>
+</div>
+
+<!-- ================= 设置（复刻 VS Settings 分组框） ================= -->
+<div class="mask" id="mSettings" data-help-scope="settings">
+  <div class="modal">
+    <header><h3>设置 (Settings)</h3><span class="x" data-close>✕</span></header>
+    <div class="body">
+      <div class="groupbox compact">
+        <div class="legend">Program</div>
+        <label class="fld">Praat 程序（praat.exe）</label>
+        <div class="row">
+          <input type="text" id="setPraat">
+          <button class="btn" id="setPraatPick">Browse...</button>
+          <button class="btn" id="setPraatTest">测试</button>
+        </div>
+        <div class="hint" id="setPraatMsg"></div>
+        <div class="hint">脚本目录由程序结构决定（恒为程序根下的 scripts/），无需配置。</div>
+      </div>
+      <div class="groupbox compact">
+        <div class="legend">Common</div>
+        <label class="fld">默认参数层级</label>
+        <div class="row"><select id="setTier">
+          <option value="novice">新手</option><option value="advanced">进阶</option>
+        </select></div>
+      </div>
+      <div class="groupbox compact">
+        <div class="legend">F0 / Formants and Bandwidths</div>
+        <label class="fld">基频范围（Hz）</label>
+        <div class="row">
+          <input type="number" id="setF0min" placeholder="下限" style="max-width:110px">
+          <span>–</span>
+          <input type="number" id="setF0max" placeholder="上限" style="max-width:110px">
+        </div>
+        <label class="fld">共振峰频率上限（Hz）</label>
+        <div class="row"><input type="number" id="setMaxF" placeholder="如 5000"></div>
+        <div class="hint">本工具的基频/共振峰采用 Praat 算法（非 VS 的 STRAIGHT/Snack），范围设置与之等效。</div>
+      </div>
+    </div>
+    <footer><span class="left" id="setMsg"></span><button class="btn primary" id="setSave">保存设置</button></footer>
+  </div>
+</div>
+
+<!-- ================= 关于 ================= -->
+<div class="mask" id="mAbout" data-help-scope="app">
+  <div class="modal">
+    <header><h3>关于</h3><span class="x" data-close>✕</span></header>
+    <div class="body">
+      <p><b>PraatSauce 助手 · VoiceSauce 风格界面 1.2</b>（作者：lingfengsh）</p>
+      <p>本程序基于 <a href="https://github.com/kirbyj/praatSauce" target="_blank">praatSauce</a>（Kirby &amp; Puggaard-Rode, MIT）开发，微调并增加部分功能。
+      所有声学参数由本机的 <b>Praat</b> 计算。</p>
+      <p>此「VoiceSauce 风格」界面复刻了 VoiceSauce 的八按钮命令栏与参数提取流程，但底层引擎主要是 <b>Praat 脚本</b>，因此<b>无需 MATLAB Runtime</b>，
+      并部分继承了向导版的显示和修改功能。</p>
+      <p class="hint">参数说明：SHR 用 Python 外接补算；STRAIGHT / Snack 等算法切换仍由 Praat 等价实现。</p>
+      <p style="margin-top:12px"><b>许可证</b>：本程序以 <b>MIT</b> 发布。随程序提供的 <b>praat.exe</b>（Praat 7.0.02）版权归 Paul Boersma 与 David Weenink 所有，以 <b>GPL-3.0-or-later</b> 发布，<b>不是</b> MIT。本程序仅以子进程方式调用 Praat，不修改也不链接它。</p>
+      <p class="hint" style="margin-top:6px">Praat 许可证全文：<a href="https://www.gnu.org/licenses/gpl-3.0.txt" target="_blank">gnu.org/licenses/gpl-3.0.txt</a><br>
+      Praat 源码获取：<a href="https://www.praat.org/download_sources.html" target="_blank">praat.org/download_sources.html</a><br>
+      完整第三方声明见程序目录内的 <b>THIRD-PARTY-NOTICES.md</b>。</p>
+    </div>
+    <footer><span class="left"></span><button class="btn" data-close>关闭</button></footer>
+  </div>
+</div>
+
+<!-- ================= 文件夹选择器 =================
+     弹窗 DOM 与样式由 ui/picker.js 在首次调用时动态注入（与向导版共用），此处不再静态声明。 -->
+
+<script src="ui/help.js"></script>
+<script src="ui/feedback.js"></script>
+<!-- 统一文件夹/文件选择器（与主程序向导共用，自包含 DOM+样式），须在 vs.js 之前加载 -->
+<script src="ui/picker.js"></script>
+<script src="ui/vs.js"></script>
+</body>
+</html>

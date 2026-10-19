@@ -1,0 +1,89 @@
+# ============================================================================
+# 引用信息（Citation File Format 1.2.0）
+#
+# 拿 DOI 的步骤（Zenodo + GitHub，免费）：
+#   1. 把本仓库推到 GitHub（public）。
+#   2. 登录 https://zenodo.org ，用 GitHub 账号授权。
+#   3. 右上角头像 → Settings → GitHub → 找到本仓库 → 拨到 ON。
+#   4. 回 GitHub，创建一个 Release（例如 tag v1.2）。Zenodo 会自动抓取并
+#      生成 DOI，几分钟后在本仓库的 Zenodo 页面出现 DOI 徽章。
+#   5. 把 DOI 填回本文件的 doi: 字段和 README 的徽章里。
+# 详细说明见仓库根 README 的「引用」一节。
+#
+# ⚠ 提交前请把这些占位符换成你自己的：
+#     repository-code / url  → 你的 GitHub 仓库地址
+#     authors[].name         → 你的署名（真名或笔名都行，要能对应到人）
+#     orcid（可选）           → https://orcid.org 免费注册
+# ============================================================================
+cff-version: 1.2.0
+message: "If you use this software in your research, please cite it as below."
+title: "PraatSauce 助手：面向中文用户的语音声学参数提取工作台"
+abstract: >-
+  一套围绕 Praat 引擎的语音声学分析图形界面，用于批量提取基频、共振峰、
+  谐波幅度差、HNR、CPP、SHR、SoE 等 50 余项声学指标。提供五步向导、
+  试跑体检、九宫格人工审核与结构化导出，面向语言学、语音学、方言与
+  发声态研究。声学计算全部由本机 Praat 完成，本程序仅负责参数配置、
+  批量调度与结果呈现。
+type: software
+version: "1.2"
+date-released: "2026-10-19"
+license: MIT
+
+authors:
+  # 取自本机 git 配置（user.name）。想用真名或中文名，直接改这里即可；
+  # 姓 / 名分开写可获得更好的自动排版：
+  #   - family-names: "凌"
+  #     given-names: "锋"
+  - name: "lingfengsh"
+
+# 若你有 ORCID，取消注释并填写（格式：https://orcid.org/0000-0000-0000-0000）
+#  - name: "零"
+#    orcid: "https://orcid.org/0000-0000-0000-0000"
+
+# ↓↓↓ 改成你的仓库地址 ↓↓↓
+repository-code: "https://github.com/your-name/praatsauce-shell"
+url: "https://github.com/your-name/praatsauce-shell"
+
+keywords:
+  - phonetics
+  - voice quality
+  - acoustic analysis
+  - Praat
+  - PraatSauce
+  - fundamental frequency
+  - formants
+  - H1-H2
+  - harmonics-to-noise ratio
+  - 语音学
+  - 声学分析
+  - 发声态
+  - 方言调查
+
+# 本工具依赖的上游软件，引用时请一并列出
+references:
+  - type: software
+    title: "PraatSauce. Praat-based tools for spectral processing"
+    authors:
+      - family-names: Kirby
+        given-names: James
+      - family-names: Puggaard-Rode
+        given-names: Rasmus
+    version: "1.0.8"
+    year: 2025
+    license: MIT
+    url: "https://github.com/kirbyj/praatsauce"
+
+  - type: software
+    title: "Praat: doing phonetics by computer"
+    authors:
+      - family-names: Boersma
+        given-names: Paul
+      - family-names: Weenink
+        given-names: David
+    version: "7.0.02"
+    year: 2026
+    license: GPL-3.0-or-later
+    url: "https://praat.org"
+
+# 拿到 Zenodo DOI 后填在这里（概念 DOI，指向所有版本）
+# doi: "10.5281/zenodo.XXXXXXX"

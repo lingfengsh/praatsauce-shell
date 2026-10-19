@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PraatSauce 助手</title>
+<link rel="stylesheet" href="ui/styles.css">
+<link rel="stylesheet" href="ui/help.css">
+</head>
+<body data-help-scope="app">
+
+<header class="topbar">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M2 12c1.6 0 1.6-6 3.2-6S6.8 18 8.4 18s1.6-12 3.2-12 1.6 12 3.2 12 1.6-9 3.2-9 1.6 9 3.2 9"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <div class="brand-text">
+      <strong>PraatSauce 助手</strong>
+      <span id="envLine" class="brand-sub">正在检查环境…</span>
+    </div>
+  </div>
+
+  <ol class="steps" id="steps">
+    <li data-step="1" data-help="step1"><i>1</i><span>选择音频</span></li>
+    <li data-step="2" data-help="step2"><i>2</i><span>要测什么</span></li>
+    <li data-step="3" data-help="step3"><i>3</i><span>批量运行</span></li>
+    <li data-step="4" data-help="step4"><i>4</i><span>查看结果</span></li>
+    <li data-step="5" data-help="step5"><i>5</i><span>导出数据</span></li>
+    <li class="about-li"><button class="btn tiny ghost" id="btnAbout" data-help="about">关于本软件</button></li>
+  </ol>
+
+  <div class="topbar-right">
+    <a class="icon-btn" href="/launch.html" data-help="switch-ui" title="切换界面（向导版 / VoiceSauce 风格）" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;font-size:12px;padding:0 8px;">切换</a>
+    <div class="tier-switch" id="tierSwitch" title="切换参数显示层级"></div>
+      <button class="icon-btn" id="btnSettings" data-help="settings" title="设置">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+        <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.9.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H3a2 2 0 1 1 0-4h.2A1.7 1.7 0 0 0 4.6 8a1.7 1.7 0 0 0-.4-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V2a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 2.9 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1z" stroke="currentColor" stroke-width="1.6"/></svg>
+      </button>
+      <button class="btn tiny ghost" id="btnFeedback" data-help="feedback" title="意见反馈 / 报 bug（在浏览器中打开收集表）">反馈</button>
+      <!-- 点击式帮助：平时不打扰，点开后才进入「鼠标变问号、点哪儿讲哪儿」的模式 -->
+      <button class="icon-btn help-toggle" id="btnHelp" aria-label="帮助模式：点开后点击界面任意处查看说明" aria-pressed="false">?</button>
+  </div>
+</header>
+
+<main id="main">
+
+  <nav class="step-topnav" id="stepTopNav">
+    <span id="topStepLabel" class="muted small"></span>
+    <span class="nav-spacer"></span>
+    <button class="btn ghost" id="topPrev" data-goto="1">← 上一步</button>
+    <button class="btn primary" id="topNext" data-goto="2">下一步 →</button>
+  </nav>
+
+  <!-- ============================ 第一步 ============================ -->
+  <section class="step-panel" data-panel="1" data-help-scope="step1">
+    <div id="onboardCard" class="onboard hidden">
+      <div class="onboard-head">
+        <div><strong>第一次使用？三步快速起步</strong><span class="muted small">只需回答三个问题</span></div>
+        <button class="btn tiny ghost" id="onboardSkip">跳过，直接用完整界面</button>
+      </div>
+      <div id="onboardBody"></div>
+    </div>
+    <div class="panel-head">
+      <h1>第一步 · 选择要分析的声音文件</h1>
+      <p class="muted">把录音放在同一个文件夹里，一次选整个文件夹就行。</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head"><h2>声音文件目录</h2></div>
+        <div class="dropzone" id="dropInput">
+          <svg viewBox="0 0 24 24" fill="none" class="dz-icon"><path d="M12 16V4m0 0L8 8m4-4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <p><strong>点击选择文件夹</strong>，或把文件夹拖到这里</p>
+          <p class="muted small">支持 wav（推荐 16 kHz 单声道）</p>
+        </div>
+        <div class="field">
+          <label>目录路径</label>
+          <div class="row">
+            <input type="text" id="inputDir" placeholder="例如 C:\Users\me\recordings" autocomplete="off">
+            <button class="btn ghost" data-pick="inputDir">浏览</button>
+          </div>
+          <p class="hint">程序会处理这个文件夹里所有指定扩展名的文件。</p>
+        </div>
+        <div class="field inline">
+          <label>扩展名</label>
+          <input type="text" id="soundExt" class="narrow" placeholder="wav">
+        </div>
+        <div id="inputSummary" class="summary-box hidden"></div>
+        <div id="healthCard" class="summary-box hidden"></div>
+        <div id="tgMatchBox" class="health-match hidden"></div>
+        <div id="fileList" class="file-list hidden"></div>
+        <div id="fileListStatus" class="file-list-status"></div>
+      </div>
+
+      <div class="col-right">
+      <div class="card">
+        <div class="card-head"><h2>结果保存到哪里</h2></div>
+        <div class="field">
+          <label>输出目录</label>
+          <div class="row">
+            <input type="text" id="outputDir" placeholder="留空 = 音频目录的 output 子目录（结果写到那里）" autocomplete="off">
+            <button class="btn ghost" data-pick="outputDir">浏览</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>结果文件名</label>
+          <input type="text" id="outputFile" placeholder="out.tsv">
+          <p class="hint">制表符分隔（.tsv），Excel 与 R 都能直接读。</p>
+        </div>
+
+      </div>
+
+      <!-- ===================== TextGrid 策略（决定测量区间怎么来，已提到醒目位置） ===================== -->
+    <div class="card tg-strategy-card" data-help="tg">
+      <div class="card-head"><h2>TextGrid（测量区间怎么来）</h2>
+        <span class="muted small">利用 Textgrid 只测标注区间；不限制就测整个文件（无视 TextGrid）</span>
+      </div>
+
+      <div class="tg-choice">
+        <label class="tg-opt active">
+          <input type="radio" name="tgStrategy" value="existing" checked>
+          <span><strong>利用 Textgrid</strong><em>测标注区间（默认）</em></span>
+        </label>
+        <label class="tg-opt">
+          <input type="radio" name="tgStrategy" value="none">
+          <span><strong>不限制</strong><em>测整个文件，无视 TextGrid</em></span>
+        </label>
+      </div>
+
+      <!-- 利用 Textgrid：检查文件 + 缺标注时给红色提示与「自动制作」按钮 -->
+      <div id="tgFields" class="tg-sub hidden">
+        <div class="field">
+          <label>查看 / 修改标注</label>
+          <div class="row">
+            <button class="btn ghost" id="btnViewTgGrid">九宫格修改/生成TextGrid</button>
+          </div>
+          <p class="hint">按九宫格浏览每个文件的切分；点格子可在波形上直接加/删/拖动边界、切换 sil↔音节并存回。
+            读的是 <b>wav 同目录同名</b> 的 TextGrid，缺文件的会自动补切。如未标注音段，将自动生成预标。</p>
+        </div>
+        <div id="tgSummary" class="summary-box hidden"></div>
+
+        <!-- 缺标注时自动出现：自动制作 Textgrid（直接出按钮） -->
+        <div id="tgMakeBlock" class="tg-make hidden">
+          <div class="field">
+            <label>难度（灵敏度是否可调）</label>
+            <div class="seg" id="tgAutoLevel">
+              <button class="seg-btn active" data-level="novice">新手 · 全自动 + 默认值</button>
+              <button class="seg-btn" data-level="advanced">进阶 · 可调</button>
+            </div>
+          </div>
+          <div id="tgAutoSliders" class="hidden">
+            <div class="field inline">
+              <label>最短静音 <span class="muted small" id="tgMinSilVal">100 ms</span></label>
+              <input type="range" id="tgMinSil" min="20" max="500" step="10" value="100">
+            </div>
+            <div class="field inline">
+              <label>最短音节 <span class="muted small" id="tgMinSylVal">100 ms</span></label>
+              <input type="range" id="tgMinSyl" min="20" max="500" step="10" value="100">
+            </div>
+            <div class="field inline">
+              <label>能量阈值 <span class="muted small" id="tgThreshVal">-25 dB</span></label>
+              <input type="range" id="tgThresh" min="-50" max="-5" step="1" value="-25">
+            </div>
+          </div>
+          <div class="field" style="align-self:flex-end">
+            <button class="btn primary" id="btnAutoSegment">自动制作 Textgrid</button>
+          </div>
+          <div id="tgAutoMsg" class="run-status hidden"></div>
+        </div>
+
+        <div class="field">
+          <label>TextGrid 目录</label>
+          <div class="row">
+            <input type="text" id="tgDir" placeholder="留空 = 与声音文件同目录" autocomplete="off">
+            <button class="btn ghost" data-pick="tgDir">浏览</button>
+          </div>
+        </div>
+        <div class="field inline">
+          <label>读第几层</label>
+          <input type="number" id="intervalTier" class="narrow" min="1" max="20" step="1" value="1">
+        </div>
+      </div>
+
+      <!-- 隐藏的内部 useTextGrid 镜像：主流程仍按此字段判断（由上面两项驱动） -->
+      <input type="checkbox" id="useTextGrid" class="hidden">
+    </div>
+      </div>
+
+    </div>
+
+    <div class="panel-foot">
+      <span id="step1Msg" class="foot-msg"></span>
+      <button class="btn primary" data-goto="2">下一步：选择要测什么 →</button>
+    </div>
+  </section>
+
+  <!-- ============================ 第二步 ============================ -->
+  <section class="step-panel hidden" data-panel="2" data-help-scope="step2">
+    <div class="panel-head">
+      <h1>第二步 · 你想测什么</h1>
+      <p class="muted">勾选要测的参数。不知道选什么就点「研究目标」一键套用；想看某项的具体含义，点右上角 <b>?</b> 后再点它。</p>
+    </div>
+
+    <div class="card" id="presetCard">
+      <div class="card-head"><h2>研究目标（一键套用常用组合）</h2></div>
+      <div class="preset-grid" id="presetGrid"></div>
+    </div>
+
+    <div class="card" id="previewCard">
+      <div class="card-head"><h2>已选测量项预览</h2><span class="muted small">与上方「研究目标」联动；也可在下方分类里直接勾选</span>
+        <button class="btn tiny ghost btnReviewGrid" title="全量审查 F0/共振峰：一眼看很多文件，点格子看详情">全量审查 F0/共振峰</button>
+      </div>
+      <div id="measurePicker"></div>
+      <div class="measure-foot">
+        <span class="col-line" id="colPreviewLine"></span>
+      </div>
+    </div>
+
+    <div class="card" id="paramCard">
+      <div class="card-head" id="paramCardHead">
+        <h2>测量参数</h2>
+        <span class="muted small" id="tierHint"></span>
+      </div>
+      <div id="paramGroups"></div>
+      <div class="chosen-wrap">
+        <div class="chosen-head">
+          <h3>测量项</h3>
+          <button class="btn tiny ghost" id="btnChosenMore" type="button">展开更多 ▾</button>
+        </div>
+        <div id="paramChosen" class="chosen-chips"></div>
+        <div id="paramCatalog" class="hidden"></div>
+      </div>
+      <div class="block" id="speakerCard" data-help="speaker">
+        <div class="card-head"><h2>发音人</h2><span class="muted small">决定基频搜索范围和共振峰上限</span>
+          <button class="btn tiny ghost" id="btnManageProfiles">管理档案</button></div>
+        <div class="chip-row" id="speakerRow"></div>
+        <div class="field-row" id="speakerFields"></div>
+      </div>
+      <div class="pfull">
+        <div class="pfull-head">
+          <h3>高级设置</h3>
+          <button class="btn tiny ghost pmore-toggle hidden" id="btnParamMore" type="button">更多高级设置…▾</button>
+        </div>
+        <div id="paramMore" class="hidden"></div>
+      </div>
+      <div class="card-foot">
+        <button class="btn ghost" id="btnResetParams">恢复我的默认值</button>
+        <button class="btn ghost" id="btnSaveDefaults" title="把当前参数存成以后每次打开时的默认值（机器路径类设置除外）">存为我的默认</button>
+        <button class="btn ghost" id="btnFactoryDefaults" title="清除已保存的自定义默认值，回到软件出厂设置">恢复出厂默认</button>
+      </div>
+    </div>
+
+    <div class="panel-foot">
+      <span id="step2Msg" class="foot-msg"></span>
+      <button class="btn ghost" data-goto="1">← 上一步</button>
+      <button class="btn primary" data-goto="3">下一步：去批量运行 →</button>
+    </div>
+  </section>
+
+  <!-- ============================ 第三步（原「试跑检查」已并入此步的「运行前检查」） ============================ -->
+  <section class="step-panel hidden" data-panel="3" data-help-scope="step3">
+    <div class="panel-head">
+      <h1>第三步 · 批量运行</h1>
+      <p class="muted">先过一遍体检，有问题会在这里拦住你，不让 Praat 直接报错。想先验证参数，也可以直接试跑一个样本看看。</p>
+    </div>
+
+    <!-- 顶部也放一个「开始批量处理」，与底部那枚同步（不用滚到底就能跑）。仅在体检通过时可点。 -->
+    <div class="run-topbar">
+      <button class="btn primary big" id="btnRunTop" disabled>开始批量处理</button>
+      <span id="runTopMeta" class="muted small">进度条与实时日志在下方「运行」卡片 ↓</span>
+    </div>
+
+    <div class="voice-hint" id="routeSwitch">
+      <div class="voice-hint-body">
+        <span class="badge">测量路线</span>
+        <strong id="routeLabel">先审 F0 / 共振峰</strong>
+        <span id="reviewState" class="review-state hidden" data-help="review-state" title="F0 与共振峰分开计：某文件算「已审」= 曾在详情页点过对应维度的「保存」（measure.json 记了 choice.pitch / choice.formant）。两者独立——存了基频不代表存了共振峰。不进详情页、无需审的文件，用九宫格工具栏「审核完成」整批标记过关。点这个框（或右侧按钮）进九宫格审核。">—</span>
+        <p id="routeDesc">已只算 F0 + 共振峰。点这个框（或右侧按钮）进九宫格：在文件详情页点「保存」才算审过——F0 与共振峰分开算，存了基频不代表存了共振峰。无需逐个审的文件，整批点「审核完成」即标记全部过关。审完回来点「开始批量处理」不再重算已审部分。</p>
+      </div>
+      <div class="voice-hint-actions">
+        <button class="btn ghost btnReviewGrid" title="打开九宫格，一眼看很多文件的 F0 曲线与共振峰候选，点格子看详情。审完记得在九宫格工具栏点「审核完成」，把结果导出，批量时就不再重算 F0/共振峰。">先全量审查 F0/共振峰</button>
+      </div>
+    </div>
+
+    <div class="voice-hint hidden" data-voice-hint>
+      <div class="voice-hint-body">
+        <span class="badge">提示</span>
+        <strong>路线 B：先审 F0 / 共振峰</strong>
+        <p>当前只算了 F0 + 共振峰。确认无误后点「继续算其余嗓音参数」补算谐波、CPP、HNR 等。</p>
+      </div>
+      <div class="voice-hint-actions">
+        <button class="btn primary btnVoiceContinue">继续算其余嗓音参数</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>运行前检查</h2>
+        <div class="row">
+          <button class="btn tiny ghost" id="btnCopyPrecheck">复制检查结果</button>
+          <button class="btn tiny ghost" id="btnRecheck">重新检查</button>
+          <button class="btn tiny primary" id="btnPreview">试跑一个样本</button>
+        </div>
+      </div>
+      <div id="precheck"></div>
+
+      <div class="preview-run" style="margin-top:16px;border-top:1px dashed var(--line);padding-top:14px">
+        <p class="hint">挑一个文件试跑，确认曲线 / 共振峰没问题再批量。任意 wav 都行，优先级高于下方下拉框里的文件夹内文件。</p>
+        <div class="field">
+          <label>试跑文件（任意 wav，优先级最高）</label>
+          <div class="field-row">
+            <input type="text" id="previewAudioPath" readonly placeholder="也可直接挑文件夹外的单个 wav…" />
+            <button class="btn ghost" id="btnPickAudio">浏览…</button>
+            <button class="btn ghost" id="btnClearAudio">清除</button>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>或选第一步文件夹内的文件</label>
+            <select id="previewFile"></select>
+          </div>
+        </div>
+        <div id="previewStatus" class="run-status hidden"></div>
+      </div>
+    </div>
+
+    <details id="previewResult" class="preview-result hidden">
+      <summary>试跑结果（曲线 / 体检 / 数值概览）— 点此折叠 / 展开</summary>
+      <div class="preview-result-body">
+        <div class="card">
+          <div class="card-head"><h2>曲线</h2>
+            <div class="chart-toggle" id="chartToggle"></div>
+          </div>
+          <div id="charts"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>体检结果</h2></div>
+          <div id="previewDiag" class="diag-list"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>数值概览</h2></div>
+          <div id="previewStats" class="stats-grid"></div>
+        </div>
+      </div>
+    </details>
+
+    <div class="card">
+      <div class="card-head"><h2>运行</h2>
+        <div class="row">
+          <button class="btn tiny ghost hidden" id="btnCopyLog">复制日志</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <button class="btn primary big" id="btnRun">开始批量处理</button>
+        <button class="btn ghost" id="btnCancel" disabled>取消</button>
+        <span id="runMeta" class="muted small"></span>
+      </div>
+      <label class="round-chk" data-help="round-values" title="结果表里的数值按列规则舍入：时间列原样保留，HNR 相关与 CPP 两位小数，其余一位小数。取消勾选则保留 Praat 原始精度。">
+        <input type="checkbox" id="roundValues" checked> 结果数值按规则舍入<em>（时间列不动；HNR / CPP 两位小数，其余一位）</em>
+      </label>
+      <div class="progress-wrap hidden" id="progressWrap">
+        <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+        <div class="progress-text" id="progressText"></div>
+      </div>
+      <div class="logbox hidden" id="logBox"></div>
+    </div>
+
+    <div class="card hidden" id="resultCard">
+      <div class="card-head"><h2>结果</h2>
+        <div class="row">
+          <button class="btn tiny ghost" id="btnCopyDiag">复制全部提示</button>
+          <button class="btn tiny ghost" id="btnExportCsv">导出 CSV（Excel 可双击打开）</button>
+          <button class="btn tiny ghost" id="btnOpenOutDir">打开输出目录</button>
+        </div>
+      </div>
+      <div id="resultSummary" class="stats-grid"></div>
+      <div id="resultDiag" class="diag-list"></div>
+      <!-- 逐行「结果表」已按用户要求去掉：要看逐点数据用「导出 CSV」，
+           --------------- 结果文件（out.tsv）本身不受影响。 -->
+    </div>
+
+    <div class="panel-foot">
+      <span id="step3Msg" class="foot-msg"></span>
+      <button class="btn ghost" data-goto="2">← 上一步</button>
+      <button class="btn primary" data-goto="4">下一步：查看测量结果 →</button>
+    </div>
+  </section>
+
+  <!-- ============================ 第四步 · 查看测量结果（结果网格） ============================ -->
+  <section class="step-panel hidden" data-panel="4" data-help-scope="step4">
+    <div class="panel-head">
+      <h1>第四步 · 查看测量结果</h1>
+      <p class="muted">批量跑完先过一眼再导出：每格一个文件，画出所选参数的逐点曲线。
+        <b>F0 / F1–F5 / B1–B5</b> 取自 wav 旁的对象文件（<code>.Pitch</code> / <code>.Formant</code>），
+        其余参数取自第三步的汇总表 <code>out.tsv</code>——缺哪类那几条曲线就是空的。
+        点格子打开<b>文件详情窗</b>（与九宫格同一套）。</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>① 选择要查看的参数</h2>
+        <span class="muted small">仿导出页的八组：每组一个下拉菜单，选中即画进格子（可多组叠加，各按本页范围缩放）；第 5 组起默认不显示，点「更多参数组」展开</span></div>
+      <!-- 八组下拉由 review-grid-ui.js 按 boot.seriesGroups 铺（与导出页同源，后端加组自动跟随）：
+           前 4 组常驻，第 5 组起折叠，#rvMoreCols 展开/收起 -->
+      <div class="rv-select-row" id="rvSelects"></div>
+      <div class="field-row" style="margin-top:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn tiny ghost" id="rvMoreCols" type="button">更多参数组 ▸</button>
+        <label class="round-chk" style="margin:0" data-help="spectrogram-bg"
+               title="勾上后每格垫一层浏览器实时算的窄带语图（25 ms 窗、0–2 kHz），方便对照音段位置；不勾则是白底纯曲线，加载更快。">
+          <input type="checkbox" id="rvSpecBg"> 语图作为背景
+        </label>
+        <label class="rv-size-lab" title="每页文件数；4×4 = 16 为默认。">每页
+          <select id="rvSize">
+            <option value="4">4（2×2）</option>
+            <option value="9">9（3×3）</option>
+            <option value="16" selected>16（4×4）</option>
+            <option value="25">25（5×5）</option>
+            <option value="36">36（6×6）</option>
+          </select>
+        </label>
+        <span class="muted small" id="rvLegend"></span>
+      </div>
+      <p class="muted small" style="margin:6px 0 0">每组最多选一个参数，可多组叠加；多条曲线各按「本页范围」单独缩放，颜色对照右侧图例。
+        灰底竖条是 TextGrid 的音节段（有切分时才画）。</p>
+    </div>
+
+    <div class="review-grid-pager">
+      <button class="btn tiny ghost" id="rvPrev">← 上一页</button>
+      <span id="rvPageInfo" class="muted small">—</span>
+      <button class="btn tiny ghost" id="rvNext">下一页 →</button>
+      <span id="rvStatus" class="muted small"></span>
+    </div>
+    <div class="review-grid-cells" id="rvCells" data-size="16"></div>
+
+    <div class="panel-foot">
+      <span id="step4Msg" class="foot-msg"></span>
+      <button class="btn ghost" data-goto="3">← 上一步</button>
+      <button class="btn primary" data-goto="5">下一步：导出数据 →</button>
+    </div>
+  </section>
+
+  <!-- ============================ 第五步 · 导出数据（逐点时间序列） ============================ -->
+  <section class="step-panel hidden" data-panel="5" data-help-scope="step5">
+    <div class="panel-head">
+      <h1>第五步 · 导出数据</h1>
+      <p class="muted">把批量运行算出来的<b>逐点测量曲线</b>（不是汇总统计）导出成 CSV。数据来自每个 wav 同目录的 <code>.Pitch</code> / <code>.Formant</code> 对象文件——先批量运行，或在九宫格里「审核完成」/单文件「存盘」，让这些文件落盘。</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>① 选择要导出的参数</h2>
+        <span class="muted small">点列标题 = 整列全选 / 取消；列内可逐项勾选（文件、时间为固定两列）</span></div>
+      <!-- 表格由 app.js 的 renderExpParams() 按后端下发的 seriesGroups 铺，
+           列标题点一下 = 全选本列；第五列起默认折叠，点列标题才展开 -->
+      <div class="exp-table-wrap" id="expParams"></div>
+      <p class="muted small" style="margin-top:10px" id="expParamHint"></p>
+    </div>
+
+    <div class="card" data-help="export-method">
+      <div class="card-head"><h2>② 导出方式</h2>
+        <span class="muted small">怎么把逐帧曲线变成 CSV 里的点</span></div>
+      <div class="exp-methods">
+        <label class="exp-method">
+          <input type="radio" name="expMethod" value="raw" checked>
+          <span><strong>原始数据</strong><em>导出 Praat 算出的每一帧（约 0.005s 一帧），不重采样。点最多、最忠实。</em></span>
+        </label>
+        <label class="exp-method">
+          <input type="radio" name="expMethod" value="smooth">
+          <span><strong>平滑后每文件取 N 点</strong>
+            <em>先对曲线做小窗平滑（只在浊音段内，不跨静音缝），再等间隔降采样到固定点数。</em></span>
+        </label>
+        <label class="exp-method">
+          <input type="radio" name="expMethod" value="interval">
+          <span><strong>按固定时间间隔</strong>
+            <em>每隔固定秒数线性插值取一个点，不同文件点数随时长自然不同。</em></span>
+        </label>
+      </div>
+      <div class="field-row exp-method-opts">
+        <div class="field exp-opt hidden" id="expOptN">
+          <label>每文件点数 N <span class="muted small" id="expNOptHint">（默认 100）</span></label>
+          <input type="number" id="expNPoints" class="narrow" min="2" max="2000" step="1" value="100">
+        </div>
+        <div class="field exp-opt hidden" id="expOptI">
+          <label>间隔（秒） <span class="muted small">（默认 0.01 = 10ms）</span></label>
+          <input type="number" id="expInterval" class="narrow" min="0.001" max="1" step="0.001" value="0.01">
+        </div>
+      </div>
+    </div>
+
+    <div class="card" data-help="export-layout">
+      <div class="card-head"><h2>③ 文件布局</h2>
+        <span class="muted small">同一份逐点数据，按哪种方式组织成文件（与上面的导出方式任意组合）</span></div>
+      <div class="exp-methods">
+        <label class="exp-method">
+          <input type="radio" name="expLayout" value="single" checked>
+          <span><strong>单文件长表</strong><em>所有音频顺序堆叠成一个 CSV（file, time_s, 参数…）。R / Python 等批量分析最方便。</em></span>
+        </label>
+        <label class="exp-method">
+          <input type="radio" name="expLayout" value="per_audio">
+          <span><strong>每音频一个文件</strong><em>每个音频一张宽表（time_s × 参数），写到输出目录的「逐音频序列」子目录。逐条对照录音、单发合作者方便。</em></span>
+        </label>
+        <label class="exp-method">
+          <input type="radio" name="expLayout" value="per_param">
+          <span><strong>每参数一个文件</strong><em>每个参数一个跨音频长表，写到输出目录的「分参数序列」子目录。按指标跑语料级统计方便。</em></span>
+        </label>
+        <label class="exp-method">
+          <input type="radio" name="expLayout" value="xlsx">
+          <span><strong>Excel 工作簿</strong><em>一个 .xlsx，每个参数一页 + 说明页。需要已安装 openpyxl（没装会明确提示）。</em></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>④ 输出</h2></div>
+      <div class="field">
+        <label>文件名（写到输出目录，留空用默认名；「每音频 / 每参数」布局不用填）</label>
+        <div class="row">
+          <input type="text" id="expFilename" placeholder="f0_formant_series.csv">
+          <button class="btn ghost" id="expOpenDir">打开输出目录</button>
+        </div>
+        <p class="hint" id="expOutHint">输出为长表：每行一个时间点，列为 <code>file, time_s, 勾选的参数…</code>，多个文件顺序堆叠。UTF-8 带 BOM，Excel 双击即可打开。</p>
+      </div>
+      <div class="field">
+        <div class="row" style="align-items:center; gap:12px;">
+          <label style="white-space:nowrap;"><input type="checkbox" id="expTgFilter" checked>
+            只导出 TextGrid 标注段</label>
+          <span class="muted small" style="white-space:nowrap;">不导出标签匹配</span>
+          <input type="text" id="expTgSkip" class="narrow" value="sil" placeholder="sil">
+          <span class="muted small">的段（正则）；空白段一律不导出；没有 TextGrid 的文件不过滤。</span>
+        </div>
+        <p class="hint">开启后按音频旁同名 <code>.TextGrid</code> 过滤：时间点落在空白段或匹配跳过标记的段（默认 sil）之外的不导出。关闭则导出全部帧。</p>
+      </div>
+      <div class="field-row">
+        <button class="btn primary big" id="btnExportSeries">导出时间序列 CSV</button>
+        <span id="expStatus" class="muted small"></span>
+      </div>
+      <div id="expResult" class="diag-list hidden"></div>
+    </div>
+
+    <div class="panel-foot">
+      <span class="foot-msg"></span>
+      <button class="btn ghost" data-goto="3">← 上一步</button>
+    </div>
+  </section>
+
+
+</main>
+
+<!-- ============================ 文件夹选择器 ============================
+     弹窗 DOM 与样式由 ui/picker.js 在首次调用时动态注入（主程序与 VoiceSauce 共用），此处不再静态声明。 -->
+
+<!-- ============================ 设置 ============================ -->
+<div class="modal-backdrop hidden" id="settingsModal" data-help-scope="settings">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>设置</h3>
+      <button class="icon-btn" id="settingsClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Praat 程序（praat.exe）</label>
+        <div class="row">
+          <input type="text" id="setPraatExe" placeholder="C:\...\Praat.exe">
+          <button class="btn ghost" id="btnPickPraat">浏览</button>
+          <button class="btn ghost" id="btnTestPraat">测试</button>
+          <button class="btn ghost" id="btnResetPraat" data-which="praatExe" title="把路径重置回程序所在目录里的 praat.exe">恢复默认</button>
+        </div>
+        <p class="hint" id="praatTestMsg">计算全部由本机 Praat 完成，这个软件只是个外壳。</p>
+      </div>
+      <div class="field">
+        <label>运行状态自检</label>
+        <div class="row">
+          <button class="btn ghost" id="btnSelfCheck">立即自检</button>
+        </div>
+        <p class="hint">脚本目录由程序自身结构决定（恒为程序根下的 scripts/），不需要也不允许配置。
+          点「立即自检」可检查：Praat 能否执行、脚本是否齐全、界面资源是否到位。</p>
+        <div id="selfCheckList"></div>
+      </div>
+      <div class="field">
+        <label>默认参数层级</label>
+        <select id="setTier">
+          <option value="novice">新手</option>
+          <option value="advanced">进阶</option>
+        </select>
+      </div>
+      <hr class="sep">
+      <div class="field">
+        <label>当前参数（params.csv）</label>
+        <textarea id="paramsRaw" class="code" rows="10" spellcheck="false"></textarea>
+        <div class="row" style="margin-top:8px">
+          <button class="btn ghost" id="btnLoadParams">从文本框导入</button>
+          <button class="btn ghost" id="btnRefreshParams">显示当前参数</button>
+          <button class="btn ghost" id="btnCopyParams">复制</button>
+        </div>
+        <p class="hint">支持任意编码与分号分隔：直接粘贴 / 编辑文本，点「从文本框导入」即可生效（未知参数会忽略，缺的用默认值）。</p>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <span class="muted small" id="settingsMsg"></span>
+      <button class="btn primary" id="btnSaveSettings">保存设置</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop hidden" id="aboutModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>关于本软件</h3>
+      <button class="icon-btn" id="aboutClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <p><b>PraatSauce 助手 · <span id="appVer">向导界面 1.2</span></b>（作者：lingfengsh）</p>
+      <p style="margin-top:8px">本程序基于 <a href="https://github.com/kirbyj/praatSauce" target="_blank">praatSauce</a>（Kirby &amp; Puggaard-Rode, MIT）开发，微调并增加部分功能。所有声学参数由本机的 <b>Praat</b> 计算。</p>
+      <p class="hint" style="margin-top:8px">参数说明：SHR 用 Python 外接补算；STRAIGHT / Snack 等算法切换仍由 Praat 等价实现。</p>
+      <p style="margin-top:12px"><b>许可证</b>：本程序以 <b>MIT</b> 发布。随程序提供的 <b>praat.exe</b>（Praat 7.0.02）版权归 Paul Boersma 与 David Weenink 所有，以 <b>GPL-3.0-or-later</b> 发布，<b>不是</b> MIT。本程序仅以子进程方式调用 Praat，不修改也不链接它。</p>
+      <p class="hint" style="margin-top:6px">Praat 许可证全文：<a href="https://www.gnu.org/licenses/gpl-3.0.txt" target="_blank">gnu.org/licenses/gpl-3.0.txt</a><br>
+      Praat 源码获取：<a href="https://www.praat.org/download_sources.html" target="_blank">praat.org/download_sources.html</a><br>
+      完整第三方声明见程序目录内的 <b>THIRD-PARTY-NOTICES.md</b>。</p>
+    </div>
+    <div class="modal-foot">
+      <span class="muted small"></span>
+      <button class="btn primary" id="aboutOk">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop hidden" id="profileModal" data-help-scope="speaker">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>发音人档案</h3>
+      <button class="icon-btn" id="profileClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="profileList"></div>
+      <div class="field-row" style="margin-top:10px">
+        <input type="text" id="profileNewName" placeholder="新档案名称">
+        <button class="btn ghost" id="btnNewProfile">从当前参数新建</button>
+      </div>
+    </div>
+    <div class="modal-foot"><span class="muted small" id="profileMsg"></span></div>
+  </div>
+</div>
+
+<!-- ============================ 全量审查 · 九宫格 ============================ -->
+<div class="modal-backdrop hidden" id="reviewGridModal" data-help-scope="review-grid">
+  <div class="modal modal-wide">
+    <div class="modal-head">
+      <h3>全量审查 F0/共振峰 · 九宫格</h3>
+      <button class="icon-btn" id="reviewGridClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="rg-grid-head">
+      <div class="field-row review-grid-toolbar">
+        <div class="field dir-field">
+          <label>声音目录</label>
+          <div class="row">
+            <input type="text" id="rgDir" placeholder="选择 wav 文件夹">
+            <button class="btn ghost" id="rgPick">浏览</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>显示内容</label>
+          <div class="seg" id="rgMode">
+            <button class="seg-btn active" data-mode="f0">F0</button>
+            <button class="seg-btn" data-mode="formant">共振峰</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>每页</label>
+          <select id="rgSize">
+            <option value="4">4</option>
+            <option value="6">6</option>
+            <option value="9">9</option>
+            <option value="12">12</option>
+            <option value="16" selected>16</option>
+            <option value="20">20</option>
+            <option value="24">24</option>
+            <option value="25">25</option>
+            <option value="30">30</option>
+            <option value="36">36</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>语图带宽</label>
+          <select id="rgBand">
+            <option value="5">5 ms</option>
+            <option value="10">10 ms</option>
+            <option value="25" selected>25 ms</option>
+            <option value="50">50 ms</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>语图对比</label>
+          <select id="rgDyn">
+            <option value="30">30 dB</option>
+            <option value="40" selected>40 dB</option>
+            <option value="55">55 dB</option>
+            <option value="70">70 dB</option>
+          </select>
+        </div>
+        <div class="field rg-selectall">
+          <input type="checkbox" id="rgSelectAll" title="全选 / 取消本页全部">
+        </div>
+        <div class="field rg-actions">
+          <button class="btn primary" id="rgRefresh"
+                  title="重新调用 Praat 抽取本页 F0 / 共振峰（读取新结果，不覆盖已有中间结果）">刷新</button>
+          <button class="btn warn" id="rgRerun"
+                  title="对勾选的文件用新参数重新抽取并覆盖中间结果（.Pitch / .Formant）">重测</button>
+          <button class="btn primary" id="rgFinishReview"
+                  title="审核收尾：把本目录【所有】wav 的 F0/共振峰按各自采用的参数导出成对象文件（主名.Pitch / 主名.Formant，存放在音频旁边）。批量处理时会直接读取这些结果、不再重算 F0/共振峰。只改了有问题的文件也没关系——没改过的会用当前参数一并导出，所以每个文件都能被判定为已审核。">审核完成</button>
+        </div>
+      </div>
+      <p class="hint rg-toolbar-hint">选整个文件夹，程序会按页批量抽取全部 wav 的 F0 / 共振峰。点每格右上角的框可勾选，再用「重测」按新参数覆盖。</p>
+      <div class="review-grid-pager">
+        <button class="btn tiny ghost" id="rgPrev">← 上一页</button>
+        <span id="rgPageInfo" class="muted small">—</span>
+        <button class="btn tiny ghost" id="rgNext">下一页 →</button>
+      </div>
+      </div><!-- /rg-grid-head -->
+      <div class="review-grid-cells" id="rgCells"></div>
+    </div>
+      <div class="rg-status-bar"><span id="rgStatus" class="hidden"></span></div>
+  </div>
+</div>
+
+<!-- ============================ 全量审查 · 批量重测参数弹窗 ============================ -->
+<div class="modal-backdrop hidden" id="rgRerunModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>批量重测（覆盖选中文件的中间结果）</h3>
+      <button class="icon-btn" id="rgRerunClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="hint">用下面参数重新抽取勾选的文件，<b>覆盖</b>已存的 .Pitch / .Formant。参数仅本次重测用，不改全局批量设置。</p>
+      <div class="field-row">
+        <div class="field" id="rgRerunF0minField">
+          <label>基频下限 f0min (Hz)</label>
+          <input type="number" id="rgRerunF0min" step="1" min="1">
+        </div>
+        <div class="field" id="rgRerunF0maxField">
+          <label>基频上限 f0max (Hz)</label>
+          <input type="number" id="rgRerunF0max" step="1" min="1">
+        </div>
+        <div class="field hidden" id="rgRerunMaxFormantField">
+          <label>共振峰上限 maxFormantHz (Hz)</label>
+          <input type="number" id="rgRerunMaxFormant" step="50" min="1">
+        </div>
+        <div class="field hidden" id="rgRerunNFormantsField">
+          <label>共振峰数量 maxNumFormants</label>
+          <input type="number" id="rgRerunNFormants" step="1" min="1" max="15">
+        </div>
+      </div>
+      <div id="rgRerunCorrections" class="rg-rerun-corrections hidden">
+        <div class="rg-rerun-corrections-head">
+          <span>以下文件含手工修正，逐条决定「覆盖」（会丢失手工成果）或「跳过」：</span>
+          <button class="btn tiny" id="rgRerunSelectAllCov">全选覆盖</button>
+        </div>
+        <div id="rgRerunCorrList" class="rg-rerun-corr-list"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" id="rgRerunCancel">取消</button>
+      <button class="btn warn" id="rgRerunStart">开始重测</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ 全量审查 · 文件详情（含选参数 / 手动改 F0 / 存盘） ============================ -->
+<div class="modal-backdrop hidden" id="reviewDetailModal" data-help-scope="detail">
+  <div class="modal modal-wide">
+    <div class="modal-head">
+      <h3>文件详情 · <span id="rgDetailName"></span></h3>
+      <!-- 2026-10-18 用户要求：保存按钮上下各放一个（这个和底部 #rgDetailSave 是同一个按钮的镜像，
+           文案/禁用态/提示实时同步，点它等于点底部那个），长内容往下翻时不用先滚回底部。 -->
+      <div class="rg-head-right">
+        <button class="btn tiny primary" id="rgDetailSaveTop" disabled
+                title="与底部「保存（F0）」是同一个按钮：只存当前标签页这一维">保存（F0）</button>
+        <!-- 只看结果时用（2026-09-27）：不用回到九宫格就能顺着看前后其他声音。
+             键盘 ← / → 同效。中间显示「第 n / 共 m 个」，到头自动禁用。 -->
+        <div class="rg-detail-nav hidden" id="rgDetailNav">
+          <button class="icon-btn" id="rgDetailPrev" title="上一个文件（←）">◀</button>
+          <span class="rg-detail-pos" id="rgDetailPos"></span>
+          <button class="icon-btn" id="rgDetailNext" title="下一个文件（→）">▶</button>
+        </div>
+        <button class="icon-btn" id="reviewDetailClose">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+
+      <!-- 顶部控制条（2026-09-25 用户要求：原先拆成三行太散，压成一条；窄屏自动折行；
+           2026-09-26 元音音标改短音段框，平滑开关随行不再单独成行）。
+           从左到右：标签页 → 元音音标音段框（仅共振峰页）/ 性别 → 语图窗长 / 对比度 →
+           显示上限（仅 F0 页）→ 两个开关 → 清空手工点。
+           所有 id 保持原样，JS 绑定不受影响。
+           语图窗长两页各记各的：F0 页默认窄带 25 ms（看谐波）、共振峰页默认宽带 5 ms（看暗纹），
+           切页自动跟着换，也可手动覆盖。 -->
+      <!-- 2026-10-02：吸顶必须拆两层——外层 .rg-detail-bar-sticky 负责 sticky（自身不滚动），
+           内层 .rg-detail-bar 保留 overflow-x:auto 横向滚动。若把 sticky 直接加在 overflow-x:auto 的条上，
+           CSS 会把它自身的 overflow-y 计算成 auto，使它成为自己的滚动容器，sticky 相对自身无效 → 吸顶失效。 -->
+      <div class="rg-detail-bar-sticky">
+      <div class="rg-detail-bar">
+        <div class="seg" id="rgDetailTabs">
+          <button class="seg-btn active" data-tab="f0">F0</button>
+          <button class="seg-btn" data-tab="formant">共振峰</button>
+        </div>
+
+        <!-- 元音音标（2026-09-26 用户要求：去掉长主输入框，直接用短音段框——
+             音段1 常驻、＋ 加一段、－ 删一段；每段框内灰字提示「音段N」）。
+             非必填：填了才参与共振峰优选（作用见下方 #rgDetailHelpFm 的「元音音标」说明）。
+             只在共振峰页显示（2026-09-26：F0 页用不上，setTab 里切换）。 -->
+        <div class="rg-bar-item" id="rgIpaWrap" data-help="ipa"
+             title="元音音标，非必填。每段一个短框：单元音填一段（如 a / ɿ），双元音填两段（如 a、i）。「＋」加一段、「－」删最后一段。填了之后：共振峰自动择优（按 4/5/6/7 各跑一套取最优）与详情页「生成共振峰候选」的推荐按该元音的常见 F1/F2/F3 参考值（男/女分开、双元音按段）优选；「平滑（Track）」的连线参考频率也改用该元音期望值（双元音取首段）。不填则全部用通用判据 / 自动估计。">
+          <span class="rg-bar-lab">元音音标</span>
+          <div id="rgIpaSegs" class="rg-ipa-segs"></div>
+          <button type="button" class="btn tiny" id="rgIpaAdd" title="加一个音段框">＋</button>
+          <button type="button" class="btn tiny" id="rgIpaDel" title="删掉最后一个音段框">－</button>
+        </div>
+
+        <label class="rg-bar-item" id="rgGenderWrap"
+               title="说话人性别：用于选男 / 女参考分布（未知则回退通用均值）。">
+          <span class="rg-bar-lab">性别</span>
+          <select id="rgGender" class="rg-bar-sel">
+            <option value="">未知</option>
+            <option value="male">男</option>
+            <option value="female">女</option>
+          </select>
+        </label>
+
+        <!-- F0 曲线的显示范围（2026-09-26 用户拍板：上下限都可调，默认按性别——
+             男 50–250、女 100–350、未知 50–250；清空 = 回性别默认数字；旧「自适应」退役）。
+             手工点落在范围外时会自动罩进来，不会被裁掉。只在 F0 页显示。 -->
+        <label class="rg-bar-item hidden" id="rgF0BottomWrap"
+               title="F0 曲线（右轴）的显示下限（Hz）。清空 = 回性别默认（男 50、女 100）。只影响显示，不影响测量。">
+          <span class="rg-bar-lab">F0下</span>
+          <input type="number" id="rgF0Bottom" class="rg-bar-num"
+                 min="0" max="1000" step="10">
+        </label>
+
+        <label class="rg-bar-item hidden" id="rgF0TopWrap"
+               title="F0 曲线（右轴）的显示上限（Hz）。清空 = 回性别默认（男 250、女 350）。设成固定值便于跨文件对比。只影响显示，不影响测量。">
+          <span class="rg-bar-lab">F0上</span>
+          <input type="number" id="rgF0Top" class="rg-bar-num"
+                 min="50" max="2000" step="10">
+        </label>
+
+        <label class="switch-row rg-edit-f0 hidden" id="rgEditWrap" data-help="manual-f0"
+               title="手工删减基频点">
+          <input type="checkbox" id="rgEditF0">
+          <span class="switch"></span>
+          <span class="switch-label"><strong>改F0</strong></span>
+        </label>
+
+        <label class="switch-row rg-edit-f0 hidden" id="rgSmoothWrap" data-help="formant-track"
+               title="用 Praat 的 Viterbi 轨迹跟踪（Formant: Track）把逐帧候选连成一条平滑轨迹。按单个文件跑（约 0.3 秒）。叠加显示：作用对象的原始逐帧点为淡色细线，彩粗线是 Track 轨迹——改了什么一眼可见，取消勾选即恢复。它只在 Praat 已算出的候选里重新选择，不插值、不造值。顶部条填了元音音标时，连线的参考频率改用该元音的常见 F1/F2/F3（轨迹整体偏向该元音）；没填则自动估计。作用对象（2026-09-26 拍板）：没生成候选就平滑基础曲线；只生成了 1 条候选就平滑它（勾不勾都行）；勾选 1 条候选就平滑它（上限+数量都用它的，生成的候选叠加仍显示）；已生成多条且没勾选、或勾了两条以上，本开关自动灰掉。">
+          <input type="checkbox" id="rgSmooth">
+          <span class="switch"></span>
+          <span class="switch-label"><strong>平滑</strong></span>
+        </label>
+
+        <!-- 多参数版（2026-09-27 用户要求）：分类参数下拉 + 叠放/追加切换，
+             与语图三件套同一行（省空间）；按钮由 JS 按 8 个参数组生成。 -->
+        <span class="rg-group-dds hidden" id="rgGroupDDs"></span>
+        <span class="rg-bar-item hidden" id="rgResModeWrap" data-help="result-display"
+               title="多参数显示方式。重叠：所有曲线画在同一张语图上（彩色纵轴左右交替），直观好比较；堆叠：每条参数独立一条窄带上下排列（时间轴对齐），各自的起伏都看得清，画布会随参数自动加高，参数数量不限。">
+          <span class="rg-bar-lab">显示</span>
+          <span class="rg-mode-seg" id="rgResModeSeg">
+            <button type="button" class="rg-mode-btn" id="rgModeOverlay" title="所有曲线叠在同一张语图上">重叠</button><button
+                   type="button" class="rg-mode-btn" id="rgModeStrip" title="每条参数一根窄带，上下堆叠">堆叠</button>
+          </span>
+        </span>
+
+        <button class="btn tiny ghost hidden" id="rgManualClear"
+                title="清掉本文件所有手工 F0 点；要点「存盘」才会从记录里真正去掉">清手工点</button>
+
+        <!-- 语图三件套（移到最右边、紧缩——次要参数不抢位置）。
+             窗长两页各记各的：F0 页默认窄带 25 ms、共振峰页默认宽带 5 ms，切页自动跟着换，也可手动覆盖。 -->
+        <span style="flex:1 1 auto"></span>
+        <label class="rg-bar-item" id="rgBandWrap" data-help="spectrogram-window"
+               title="语图窗长（带宽，ms）。窗越短越「宽带」：时间细、频率糊，看共振峰暗纹与浊音横杠；窗越长越「窄带」：频率细，能看到单根谐波与基频走向。F0 页与共振峰页各记各的值。">
+          <span class="rg-bar-lab">窗长</span>
+          <select id="rgBandDetail" class="rg-bar-sel">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+          </select>
+        </label>
+
+        <label class="rg-bar-item" id="rgDynWrap" data-help="spectrogram-dynamic"
+               title="语图对比度（动态范围 dB）：数值越小对比越强，共振峰带更黑更醒目；越大层次越多但发灰。">
+          <span class="rg-bar-lab">对比度</span>
+          <select id="rgDynDetail" class="rg-bar-sel">
+            <option value="30">30</option>
+            <option value="40" selected>40</option>
+            <option value="55">55</option>
+            <option value="70">70</option>
+          </select>
+        </label>
+
+        <!-- F0 页语图的显示频率上限。只影响语图背景与左侧灰刻度；F0 曲线的纵轴由「F0下/F0上」控制。只在 F0 页显示。 -->
+        <label class="rg-bar-item hidden" id="rgSpecTopWrap"
+               title="F0 页语图的显示频率上限（Hz），默认 2000（窄带语图专用：覆盖基频与头几根谐波足矣）。可调大（如 5000）也可调小。只影响语图背景与左侧灰刻度，F0 曲线纵轴由旁边的「F0下/F0上」控制。">
+          <span class="rg-bar-lab">谱上限</span>
+          <input type="number" id="rgSpecTop" class="rg-bar-num"
+                 min="200" max="8000" step="100" value="2000">
+        </label>
+      </div><!-- /rg-detail-bar -->
+      </div><!-- /rg-detail-bar-sticky -->
+
+      <!-- 从第四步「查看测量结果」点开的详情：参数选择已收进顶栏的 8 个分类下拉
+           （见上面 rgGroupDDs），此处不再有独立参数栏。已选参数落在左栏（原调参面板位置）。 -->
+
+      <!-- 2026-09-25：滑块面板与语图左右分栏（用户要求边拉边看效果）；
+           2026-09-26 用户要求滑条放图左侧 → 调参面板在左、画布在右。
+           画布宽度取自父容器，分栏后自动缩窄，无需改绘制逻辑。 -->
+      <div class="rg-detail-mid">
+        <!-- 第四步详情的「已选参数」栏（2026-09-27）：点参数名去掉该曲线；
+             色块 / 边框 / 纵轴刻度都跟曲线同色，数值范围也写在这里——不同参数量纲不同，
+             图上每组刻度只对自己的那条曲线负责。占位就是原先调参面板的位置。 -->
+        <div class="rg-res-panel hidden" id="rgResPanel">
+          <div class="rg-res-panel-head">已选参数 <em id="rgResCount"></em>
+            <span class="muted small" id="rgResStatus" style="margin-left:8px"></span></div>
+          <div class="rg-res-chips" id="rgResChips"></div>
+        </div>
+
+        <!-- F0 测量参数实时预览（仅 F0 标签页显示，2026-09-25）：
+             滑块调参 → 防抖 350ms → 后端跑一次单文件 pitch 分析 → 青色预览曲线叠加显示。
+             默认 filtered AC：Praat 2023 起的推荐方法，也是主批量（pitchMethod=0）
+             与审查抽取/导出统一使用的算法；raw AC 仅作对照。 -->
+        <details class="rg-preview" id="rgPreviewPanel" open>
+          <summary>调基频测量参数（滑块实时预览）</summary>
+          <div class="rg-preview-body">
+            <div class="rg-preview-row">
+              <div class="seg seg-sm" id="rgPrevMethod">
+                <button class="seg-btn active" data-m="filtered">filtered AC</button>
+                <button class="seg-btn" data-m="raw">raw AC</button>
+              </div>
+              <span class="rg-preview-status" id="rgPrevStatus"></span>
+              <button class="btn tiny ghost" id="rgPrevReset" style="margin-left:auto"
+                      title="滑块回到默认参数（filtered AC 标准值），并撤掉青色预览线——图恢复成打开详情时的样子（只影响显示，不影响已存盘的参数）。">恢复默认</button>
+            </div>
+            <div class="rg-sliders" id="rgSliders"></div>
+            <p class="muted small" style="margin:4px 0 6px">
+              filtered AC 是 Praat 2023 起的推荐基频算法，与主批量一致；raw AC 仅作对照。
+              青色粗线 = 当前滑块参数算出的预览曲线（叠加在候选上）。<b>拉滑块只改预览，
+              不会自动存盘</b>——满意后点下面按钮才记入参数并导出。「上限」在 raw 方法里是
+              硬 ceiling（标准 600Hz），在 filtered 方法里是 pitch top（标准 800Hz，顶部频率
+              被平滑压制而非硬截断，所以设得比 raw 高）。</p>
+            <span style="display:inline-flex; gap:6px">
+              <button class="btn tiny primary" id="rgPrevSave"
+                      title="把当前滑块参数记入 measure.json 并导出对象文件；批量运行读到这份 .Pitch 后不再重算。">采用这组参数并存盘</button>
+            </span>
+          </div>
+        </details>
+
+        <!-- 共振峰候选面板（2026-09-26 用户要求：生成按钮从底部移到这里、候选表也放语图左侧，
+             与 F0 页滑块面板同位；只在共振峰页显示，setTab 切换）。
+             生成前面板里只有「生成候选」按钮；生成后下方铺候选二维表（上限 × 数量）。 -->
+        <details class="rg-preview rg-formant-panel hidden" id="rgFormantPanel" open>
+          <summary>共振峰候选</summary>
+          <div class="rg-preview-body">
+            <button class="btn tiny primary" id="rgDetailBuild"
+                    title="对当前文件用 20 组参数（上限 4977~6078 Hz = FormantPath 阶梯 -2..+2 档 × 数量 4/5/6/7）各跑一次共振峰，叠在语图上对比、选定后存盘；更外侧档位用 FormantPath 编辑器。">生成候选</button>
+            <button class="btn tiny ghost" id="rgDetailReset"
+                    title="把候选对比区恢复成刚进入详情页时的样子：撤掉平滑（Track）叠加线、所有叠加的候选、清掉「存盘记录用」选择、去掉「推荐」角标、隐藏候选二维表（回到「九宫格抽取的那一条曲线」）。只影响显示，不改动已存盘的 measure.json。">恢复默认</button>
+            <div class="cand-box" id="rgCandList"></div>
+          </div>
+        </details>
+
+        <div class="rg-detail-canvas-wrap">
+          <canvas id="rgDetailCanvas" width="600" height="300"></canvas>
+          <!-- 试听 / 在 Praat 中查看：弱化为图形右上角的小按钮（2026-09-25），不占顶部空间 -->
+          <div class="rg-canvas-overlay">
+            <button class="icon-btn rg-ov-btn" id="rgDetailPlay" title="试听这一条">▶</button>
+            <button class="icon-btn rg-ov-btn rg-ov-text" id="rgDetailOpenPraat"
+                    title="只用于查看/试听，不会把这里的改动拿回来。想在 Praat 里精修并把结果用于批量，用「在 Praat 中修周期」（F0）、「FormantPath 编辑器」（共振峰），或在那里手动导出后点「导入修正数据」。">Praat</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 文件路径（次要信息，移到语图下面、弱化处理，不占顶部空间，2026-09-25） -->
+      <div class="rg-detail-path">
+        <span class="rg-detail-path-label">路径</span>
+        <input type="text" id="rgDetailPath" readonly>
+      </div>
+
+      <p class="muted small" id="rgDetailMeta"></p>
+      <p class="muted small rg-manual-hint hidden" id="rgManualHint"></p>
+
+      <!-- 多组参数同时选着看时，点存盘先在这里问清「记哪一组」；只选了一组就直接存 -->
+      <div class="rg-save-ask hidden" id="rgSaveAsk"></div>
+
+      <!-- 注释分维度：通用说明常驻，F0 / 共振峰各自一段、随标签页切换显隐（用户 2026-09-26）。 -->
+      <p class="hint" id="rgDetailHelpGen">
+        <b>F0 / 共振峰分成两个标签页</b>各管一维：生成候选、存盘、修正互不干扰，切换只重绘、不重跑 Praat；
+        打开时<b>自动落在九宫格当前模式对应的那一页</b>。两页背景都是<b>窄带语图</b>（25 ms 窗，
+        F0 页语图上限默认 2 kHz，顶部条「显示上限」可改——F0 都在 400 Hz 以下时调小更好看）：
+        F0 页<b>左侧灰刻度是语图、右侧橙刻度是 F0</b>（F0 按自身频率范围自适应铺满，否则 60–400 Hz 会被压成一条扁线）；
+        共振峰页只标左侧刻度。<br>
+        <b>图形右上角「▶ 试听」「Praat」</b>只负责听和看，不写任何数据。想用 Praat 手工精修并把结果用起来，
+        走下面的「修周期 / FormantPath / 导入修正数据」闭环。<br>
+        <b>保存（F0）/ 存盘（共振峰）</b>：同一个按钮，标签随标签页变，只存当前标签页这一维，
+        另一页的已存选择不受影响。
+        F0 页「保存（F0）」记录的是<b>手工修正点 / 修周期标记</b>并<b>立即重导 wav 旁的 .Pitch</b>。
+        F0 参数取当前实际状态：<b>拉过滑块 → 存预览曲线的那组参数（所见即所得）</b>；
+        没拉过 → 沿用该文件已存的参数；都没有 → 用第一步批量抽取的默认参数
+        （「采用这组参数并存盘」效果相同，只是显式一步）；共振峰页没在候选区选过组时会先弹「记哪一组」的选择框。
+        存盘同时把该文件对应维度的对象重导一次到 wav 旁——批量运行读到这些对象文件就不再重算。<br>
+        <b>导入修正数据</b>：把你在 Praat 里<b>手动导出的修正文件</b>拿回来。先在旁边下拉框选类型
+        （「自动识别」一般即可，认 PitchTier 文本 / FormantGrid 文本 / 逐帧 text 三种格式），
+        点按钮选文件——导入后该维度整条曲线被替换、候选对比自动撤掉、九宫格那一格同步更新；
+        记得点「存盘」把结果记下来并导出对象文件。
+      </p>
+      <p class="hint rg-detail-help-f0 hidden" id="rgDetailHelpF0">
+        <b>F0 页 · 点图改 F0</b>（<b>默认不勾选</b>，只在 F0 页生效——改 F0 尽量先用左侧滑块调参，
+        零星坏点调不动才点图改）：<b>逐点编辑</b>——「相关线」（没拉滑块 = 橙色原始曲线；
+        拉了滑块 = 青色预览线）上铺满<b>小点</b>（每帧一个 = 原始帧测量点，颜色跟线走）。
+        <b>点小点 = 删掉这个点</b>（曲线从相邻帧<b>平滑桥接</b>跨过，绝不碰别的帧），
+        <b>点灰空心圈 = 恢复</b>它；<b>点空白处 = 加一个 F0 手工点</b>（深紫色，时间自动吸附到最近一帧，
+        新值只替换那一帧）；<b>无论点加得离曲线多远，都会与曲线平滑连接</b>——
+        中间的无声段/空档自动用保单调插值（PCHIP）补上，不会出现孤立的点；
+        <b>点紫点 = 撤销手工点</b>。<b>「清空手工点」一键全清（含恢复被删的帧）</b>。
+        加/删只改当前显示，<b>要点「保存（F0）」才落盘</b>（保存后写进 measure.json 并随导出写进
+        wav 旁的 .Pitch——删的点写桥接值，其余帧一字不动）。整条曲线都不对就用「在 Praat 中修周期」。<br>
+        <b>F0 页 · 在 Praat 中修周期 → 读回修周期结果</b>：两段式人工修正。点按钮后 Praat 先让你在
+        PointProcessEditor 里逐周期改脉冲（不需要改就点「跳过脉冲」），接着打开 PitchTier 编辑器修声调曲线
+        （不需要修就直接点「曲线改好了，导出」）。导出文件直接落在 wav 同目录；回来点「读回」即覆盖图上的 F0
+        显示，并记 ppfix 标记——之后批量与导出都直接用这份结果、不再重算。<br>
+        <b>F0 页 · 调基频测量参数（滑块实时预览）</b>：拉滑块看青色预览线（约 0.35 秒防抖），
+        raw AC 与批量同算法，filtered AC 是 Praat 2023 起的推荐方法；满意后点面板里的
+        「采用这组参数并存盘」，之后批量都用这组参数；<b>「恢复默认」</b>一键把滑块拉回默认参数
+        并撤掉青线（只影响显示，不动已存盘的参数）。
+        <b>出现青线后，点图编辑（加点/删点）都作用在青线上</b>，青线与手工点自动平滑连接，
+        原橙线降为淡色参考；点「恢复默认」或换参数后青线回到纯预览。<br>
+      </p>
+      <p class="hint rg-detail-help-fm hidden" id="rgDetailHelpFm">
+        <b>元音音标（顶部短框，非必填）</b>：给这个文件填 1~2 个元音——「音段1」框常驻，
+        单元音填一段（如 a、ɿ），双元音填两段（如 a、i），「＋」加段、「－」删段；
+        <b>不填完全不影响其它功能</b>。填了之后，共振峰的优选会<b>按该元音的常见 F1/F2/F3 参考值</b>
+        （跨语言聚合参考库，男 / 女分开；双元音按首尾两段分别取）参与打分：
+        九宫格共振峰自动逐音节择优、详情页「生成共振峰候选」标出并预选<b>「推荐」组</b>（蓝框角标），
+        都吃这个先验——越贴合参考值的候选越优先。顶部「性别」选男 / 女决定用哪套参考值（未知用通用均值）。
+        <b>「平滑（Track）」也吃音标</b>：Track 连线本有一个参考频率参数（没音标时按语音段均值自动估计），
+        填了音标就改用该元音期望的 F1/F2/F3（双元音取首段），轨迹整体偏向该元音的候选——
+        顶部条刚填、还没存盘的音标同样生效；存盘后批量与「审核完成」的平滑写回也带上这份先验。<br>
+        <b>「生成候选」（左侧候选面板，仅共振峰页；F0 已没有候选对比，参数一律用左侧滑块面板调）</b>：
+        生成<b>上限 4977~6078 Hz × 数量 4/5/6/7 共 20 组</b>。上限五档是 Praat FormantPath
+        标准阶梯（ceilingStep=5% 对数步长）以 5500 为中心的 -2..+2 档，相邻档差 5%；
+        要更外侧的档（4503 低档 / 6390、6718 高档，如女声 F3/F4 偏高时）请点<b>「FormantPath 编辑器」</b>跑全 9 档逐段择优。
+        （LPC 阶数 = 2 × 数量，两者要配套看，
+        数量选少了 F1/F2 会糊成一个包络峰，实测数量 4 时 F1 虚高到 1100 Hz 以上）。
+        共振峰候选用<b>二维表</b>展示：<b>行 = 上限、列 = 数量</b>，点方格即叠加那一组（每行每列互不牵连）；
+        图上<b>同一上限同色</b>、<b>数量定线型</b>（4 = 实线、5 = 点线、6 = 虚线、7 = 点划线）；
+        勾选<b>恰好一条</b>才能存盘（勾多了会自动灰掉）；<b>平滑</b>看候选个数：没生成候选 = 平滑基础曲线、<b>只有 1 条候选 = 平滑它（不用勾）</b>、多条且没勾选 = 灰掉（先勾一条）、勾选 1 条 = 平滑它；最终采用哪一组默认按「推荐」组（蓝框角标），存盘时若未指定会追问一次。<br>
+        <b>共振峰页 · 平滑（Track）</b>：对当前文件跑一次 Praat 的 Viterbi 轨迹跟踪，结果<b>叠加显示</b>
+        （作用对象的原始逐帧点为淡色细线，彩粗线 = Track 轨迹），不覆盖原始数据，取消勾选即恢复；
+        平滑与候选<b>共存</b>——平滑作用在哪条候选上，候选叠加不消失，点「恢复默认」可一并撤掉。<br>
+        <b>共振峰页 · FormantPath 编辑器 → 读回 FormantPath 结果</b>：在自动择优给出的初值上人工复核；
+        右侧网格每个矩形是一套 ceiling 分析（矩形上的数字 = stress，越小越好），点矩形即把该时段换成那一套，
+        点「导出并退出」后回来点「读回」。<br>
+      </p>
+      <p class="hint hidden" id="rgDetailHelpRes">
+        <b>只看不改</b>：这里不提供改点、平滑、存盘那一套（要改请用九宫格 / 第三步的详情入口）。
+        顶上只剩语图参数（窗长 / 对比度 / 谱上限），底部那一排存盘 / 修周期 / 导入按钮整条收起。
+        <b>点标题栏的 ◀ ▶（或按键盘 ← →）直接翻到上一个 / 下一个文件</b>，不用退回九宫格；
+        中间显示「第 n / 共 m 个」，到头自动禁用。<b>点一个参数名叠一条曲线，最多 6 条</b>，
+        点左栏已选参数名去掉。<b>颜色即刻度</b>：图左右各若干条纵轴，颜色与曲线一致，
+        每条曲线按自己的范围铺满图高——所以只能比较「形状与时间位置」，<b>不能跨参数比高低</b>。<br>
+        数据来源：<b>F0</b> 读 wav 旁的 .Pitch，<b>F1–F5 / B1–B5</b> 读 .Formant，<b>其余各列</b>读
+        汇总表 out.tsv。某一列全是空的 = 还没跑出那一列（先在第三步批量跑一次）。
+      </p>
+      <input type="file" id="rgImportFile" accept=".txt,.Pitch,.Formant,.PitchTier,.praat" class="hidden">
+    </div>
+
+    <!-- 操作按钮固定在弹窗底部（不随上面内容滚动），保证窗口内图 + 按钮同时可见。
+         按钮按标签页分组：F0 页只显示 F0 的，共振峰页只显示共振峰的（用户 2026-09-25 拍板）。 -->
+    <div class="modal-foot rg-detail-foot" id="rgDetailFoot">
+      <div class="rg-detail-actions">
+        <!-- 「生成候选」已移到语图左侧的候选面板（2026-09-26），底部不再放 -->
+        <button class="btn ghost" id="rgDetailSave" disabled
+                title="同一个按钮，标签随标签页变：F0 页「保存（F0）」= 写入手工修正点/修周期标记并立即重导 .Pitch；共振峰页先「生成候选」选好组再存盘。只存当前标签页这一维，另一页的已存选择不受影响">保存（F0）</button>
+        <span class="rg-tab-btns" id="rgF0Btns">
+          <button class="btn ghost" id="rgDetailFixPP"
+                  title="两段式人工修周期（点图改不动的整条烂曲线用这个）：第 1 步在 PointProcessEditor 里逐周期改脉冲（点「跳过脉冲」可跳过），第 2 步在 PitchTier 编辑器里修声调曲线（不需要改就直接点导出）；点「曲线改好了，导出」后结果直接存到 wav 同目录——与批量复用、审核导出同一位置，人工修一次批量就永久用这份结果。">在 Praat 中修周期</button>
+          <button class="btn ghost" id="rgDetailReadPP"
+                  title="读回「在 Praat 中修周期」导出的 .Pitch，覆盖该格的 F0 显示。文件位置固定（wav 同目录），不需要选文件；读回后批量测量也会用这份修正结果（导出时自动跳过重算，防止覆盖）。">读回修周期结果</button>
+        </span>
+        <span class="rg-tab-btns" id="rgFmBtns">
+          <button class="btn ghost" id="rgDetailOpenFp"
+                  title="用 Praat 的 FormantPathEditor 人工复核/微调单个文件的共振峰：右侧网格每个矩形是一套 ceiling 分析，点矩形即把该时段换成那一套；矩形上的数字是 stress（越小越好）。以默认 ceiling 路径为初值，你只改有问题的段。点「导出并退出」后回来点旁边的「读回 FormantPath 结果」。">FormantPath 编辑器</button>
+          <button class="btn ghost" id="rgDetailReadFp"
+                  title="读回「FormantPath 编辑器」导出的 Formant 文件，覆盖该格的共振峰。文件位置固定（系统临时目录 praatsauce_formantpath），不需要选文件。">读回 FormantPath 结果</button>
+        </span>
+        <div class="rg-import-group" id="rgImportGroup">
+          <select id="rgImportKind">
+            <option value="auto">导入为：自动识别</option>
+            <option value="f0">导入为：F0（基频）</option>
+            <option value="formant">导入为：共振峰</option>
+          </select>
+          <button class="btn ghost" id="rgDetailImport">导入修正数据</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ 音节自动切分 · 九宫格检查 ============================ -->
+<div class="modal-backdrop hidden" id="syllableGridModal" data-help-scope="tg">
+  <div class="modal modal-wide">
+    <div class="modal-head">
+      <h3>音节自动切分 · 九宫格检查</h3>
+      <button class="icon-btn" id="syllableGridClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="rg-grid-head">
+      <div class="field-row review-grid-toolbar">
+        <div class="field" style="flex:0 0 auto; min-width:auto;">
+          <label>每页数量</label>
+          <select id="sySize">
+            <option value="4">4（2×2）</option>
+            <option value="6">6（3×2）</option>
+            <option value="9">9（3×3）</option>
+            <option value="12">12（4×3）</option>
+            <option value="16" selected>16（4×4）</option>
+            <option value="20">20（5×4）</option>
+            <option value="24">24（6×4）</option>
+            <option value="25">25（5×5）</option>
+            <option value="30">30（6×5）</option>
+            <option value="36">36（6×6）</option>
+          </select>
+        </div>
+        <div class="field sy-selectall" style="flex:0 0 auto; min-width:auto;">
+          <input type="checkbox" id="sySelectAll" title="全选 / 取消本页全部">
+        </div>
+        <div class="field rg-actions" style="align-self:flex-end;">
+          <button class="btn ghost" id="syRefresh"
+                  title="重新读取本页 TextGrid（读已有文件，不会覆盖手工精修）。在 Praat 里改完边界/标签并存盘后点它拉回网页。">刷新</button>
+          <button class="btn warn" id="syRerun"
+                  title="对勾选的文件用新参数重新切分并覆盖 TextGrid">重切分</button>
+        </div>
+      </div>
+      <p class="hint">静音段标 <b>sil</b>，音节段默认用文件名标注；波形上叠加切分位置。点格子可在 Praat 里精修。</p>
+      <div id="syStatus" class="run-status hidden"></div>
+      <div class="review-grid-pager">
+        <button class="btn tiny ghost" id="syPrev">← 上一页</button>
+        <span id="syPageInfo" class="muted small">—</span>
+        <button class="btn tiny ghost" id="syNext">下一页 →</button>
+      </div>
+      </div><!-- /rg-grid-head -->
+      <div class="review-grid-cells" id="syCells"></div>
+    </div>
+    <div class="modal-foot">
+      <div class="field inline" style="flex:1 1 auto; margin:0;">
+        <label style="flex:none;">声音目录</label>
+        <input type="text" id="syDir" placeholder="自动套用第一步已选目录" readonly>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ 音节切分 · 批量重切分参数弹窗 ============================ -->
+<div class="modal-backdrop hidden" id="syRerunModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>批量重切分（覆盖选中文件的 TextGrid）</h3>
+      <button class="icon-btn" id="syRerunClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="hint">用下面进阶参数重新切分勾选的文件，<b>覆盖</b>同名 .TextGrid（无论是否曾手工精修）。参数仅本次用，不改全局设置。</p>
+      <div class="field-row">
+        <div class="field">
+          <label>最小静音段 (s)</label>
+          <input type="number" id="syRerunMinSilence" step="0.01" min="0">
+        </div>
+        <div class="field">
+          <label>最小音节段 (s)</label>
+          <input type="number" id="syRerunMinSyllable" step="0.01" min="0">
+        </div>
+        <div class="field">
+          <label>阈值 (dB)</label>
+          <input type="number" id="syRerunThresh" step="1">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" id="syRerunCancel">取消</button>
+      <button class="btn warn" id="syRerunStart">开始重切分</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ 音节自动切分 · 单格详情 ============================ -->
+<div class="modal-backdrop hidden" id="syllableDetailModal">
+  <div class="modal modal-wide">
+    <div class="modal-head">
+      <h3>切分详情 · <span id="syDetailName"></span></h3>
+      <!-- 2026-10-18 用户要求：保存按钮上下各放一个（顶部这个与下方 #syDetailSave 同步，点它等于点下方那个） -->
+      <div class="rg-head-right">
+        <button class="btn tiny primary" id="syDetailSaveTop" disabled
+                title="与下方「保存 TextGrid（浏览器编辑）」是同一个按钮">保存 TextGrid</button>
+        <button class="icon-btn" id="syllableDetailClose">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="rg-detail-canvas-wrap">
+        <canvas id="syDetailCanvas" width="600" height="220"></canvas>
+      </div>
+      <div class="sy-detail-info" id="syDetailInfo"></div>
+      <div class="rg-detail-actions">
+        <button class="btn ghost" id="syDetailPlay">▶ 试听</button>
+        <button class="btn primary" id="syDetailSave" disabled>保存 TextGrid（浏览器编辑）</button>
+        <button class="btn ghost" id="syDetailOpenPraat">在 Praat 中打开（含 TextGrid）</button>
+        <button class="btn ghost" id="syDetailReload">重新载入此文件切分</button>
+        <button class="btn ghost" id="syDetailRefresh">刷新（从文件读取）</button>
+      </div>
+      <p class="hint" id="syDetailHelp">
+        <b>浏览器内直接编辑（推荐）</b>：在波形上<b>点空白处</b>插入一个音节边界（把当前段一分为二）；
+        <b>点已有的边界竖线</b>可删除它（合并相邻两段）；<b>按住边界拖动</b>可微调位置；
+        下方<b>段标签芯片</b>：单击在「sil ↔ 音节」之间切换（会记住该段原来的文字），
+        <b>双击可任意改标注文字</b>（Enter 或点别处提交，Esc 取消，留空即 sil）。<br>
+        改完点 <b>「保存 TextGrid」</b> 即把结果写回同目录同名文件（无需启动 Praat）。<br>
+        仍想用专业编辑器？点「在 Praat 中打开」会启动本机 Praat 载入 wav+TextGrid：在编辑器里改完边界/标签后，
+        点 Praat 里的 <b>「保存并退出」</b> 写回文件，再点本页 <b>「刷新（从文件读取）」</b> 把结果拉回网页。
+        删除边界更宽容：在已有边界左右 <b>15ms 内</b> 点击即可删除（合并相邻两段）。
+      </p>
+    </div>
+    <div class="modal-foot">
+      <div class="field inline" style="flex:1 1 auto; margin:0;">
+        <label style="flex:none;">路径</label>
+        <input type="text" id="syDetailPath" readonly>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 还有文件没完成共振峰和基频审核时，点「开始批量处理」的确认框 -->
+<div class="modal-backdrop hidden" id="reviewAskModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>还没完成共振峰和基频审核</h3>
+      <button class="icon-btn" id="reviewAskClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="hint" id="reviewAskText"></p>
+      <div class="review-ask-list" id="reviewAskList"></div>
+      <p class="hint">继续 = 这些文件从头算一遍 F0/共振峰再算其余参数；已审过的文件不会重算。建议先退回，把剩下的文件在九宫格里审完（F0 页 / 共振峰页各自点「保存」，或整批点「审核完成」标记过关）。</p>
+      <div class="ask-actions">
+        <button class="btn primary" id="reviewAskGo">继续（不重算已审、其余照算）</button>
+        <button class="btn ghost" id="reviewAskCancel">退回完成审核</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="ui/help.js"></script>
+<script src="ui/feedback.js"></script>
+<!-- 统一文件夹/文件选择器（主程序向导与 VoiceSauce 共用，自包含 DOM+样式），须在 app.js 之前加载 -->
+<script src="ui/picker.js"></script>
+<script src="ui/app.js"></script>
+<script src="ui/profiles-ui.js"></script>
+<script src="ui/review-grid-ui.js"></script>
+<script src="ui/syllable-grid-ui.js"></script>
+</body>
+</html>

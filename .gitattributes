@@ -1,0 +1,14 @@
+# 只在必要时声明二进制，避免 Git 尝试做文本 diff / 行尾转换。
+# 不写 `* text=auto`：仓库历史提交用的是 CRLF，重新归一化会产生整库的
+# 无意义 diff，对冻结版本没有好处。
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.docx  binary
+*.xlsx  binary
+*.wav   binary
+*.mp3   binary
+*.exe   binary
+*.dll   binary
+*.zip   binary

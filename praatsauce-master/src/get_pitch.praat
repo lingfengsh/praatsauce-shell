@@ -1,0 +1,112 @@
+### Get pitch values
+
+procedure pitch: .timeStep, .f0min, .f0max, .start, .end, .method, .windowShape,
+  ... .maxNoCandidates, .silenceThreshold, .voicingThreshold, .octaveCost,
+  ... .octaveJumpCost, .voicedUnvoicedCost, .killOctaveJumps,
+  ... .save, .saveDir$, .read, .readDir$, .basefn$
+
+## extract padded snippet
+## one analysis window corresponds ROUGHLY to three pitch cycles (i.e.
+## 3 * pitch floor), because for some reason this number is rounded in some
+## arcane fashion.
+
+snd = selected("Sound")
+dur = Get total duration
+
+if .windowShape = 0
+  cyclesPerWindow = 3
+else
+  cyclesPerWindow = 6
+endif
+
+@snippet: .start, .end, ((cyclesPerWindow * (1 / .f0min)) / 2) + (.timeStep / 2)
+snippet = selected("Sound")
+
+## 本项目补丁（PraatSauce 1.0.8 上游缺）：
+## 原条件为 `if .read = 0`——pitchRead 勾选而对象文件不存在时，
+## `Read from file` 直接报错并中断整个批量脚本。
+## 现改为：请求读但文件缺失时回落到计算分支（若 .save 开着会顺手存盘，自愈）。
+## 已验证：fileReadable 在 Praat 7.0.02 返回 1/0；文件存在时走读取分支，行为不变。
+if .read = 0 or fileReadable(.readDir$ + .basefn$ + ".Pitch") = 0
+
+  snippetDur = Get total duration
+  if snippetDur < (1 / .f0min) * cyclesPerWindow
+    .f0min = ((1 / snippetDur) * cyclesPerWindow) + 1
+  endif
+
+  if .method = 0
+
+    ## untouched argument is the undocumented attenuation at ceiling preprocessing
+
+    pitchOrg = noprogress To Pitch (filtered ac): .timeStep, .f0min, .f0max,
+      ... .maxNoCandidates, .windowShape, 0.03, .silenceThreshold,
+      ... .voicingThreshold, .octaveCost, .octaveJumpCost, .voicedUnvoicedCost
+
+  elsif .method = 1
+
+    pitchOrg = noprogress To Pitch (raw cc): .timeStep, .f0min, .f0max,
+      ... .maxNoCandidates, .windowShape, .silenceThreshold, .voicingThreshold,
+      ... .octaveCost, .octaveJumpCost, .voicedUnvoicedCost
+
+  else
+
+    pitchOrg = noprogress To Pitch (raw ac): .timeStep, .f0min, .f0max,
+    ... .maxNoCandidates, .windowShape, .silenceThreshold, .voicingThreshold,
+    ... .octaveCost, .octaveJumpCost, .voicedUnvoicedCost
+
+  endif
+
+  if .save <> 0
+
+    Save as text file: .saveDir$ + .basefn$ + ".Pitch"
+
+  endif
+
+else
+
+  pitchOrg = Read from file: .readDir$ + .basefn$ + ".Pitch"
+
+endif
+
+## Kill octave jumps
+## this procedure also removes candidates from the resulting object,
+## which is why it is done before potentially saving a pitch file
+## seems nonsensical to write pitch files to disk without candidates
+
+if .killOctaveJumps <> 0
+
+  pitchFilt = noprogress Kill octave jumps
+
+endif
+
+.meanF0 = Get mean: 0, 0, "Hertz"
+
+## grab all values as a vector
+
+.f0# = List values in all frames: "Hertz"
+
+## grab frame times and number of frames
+
+.times# = List all frame times
+.numFrames = Get number of frames
+
+if .start > 0 | .end < dur
+
+  @restrictInterval: .times#, .f0#, .start, .end
+
+  .times# = restrictInterval.newTimes#
+  .f0# = restrictInterval.newVals#
+  .numFrames = size(restrictInterval.newTimes#)
+
+endif
+
+## clean up
+
+removeObject: pitchOrg, snippet
+if .killOctaveJumps <> 0
+  removeObject: pitchFilt
+endif
+
+selectObject: snd
+
+endproc

@@ -1,0 +1,37 @@
+MIT License
+
+Copyright (c) 2026 lingfengsh (PraatSauce 助手)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---------------------------------------------------------------------------
+本许可仅覆盖本仓库中由本项目作者编写的代码（ps-shell/、scripts/ 中的
+ps_*.praat、构建脚本与文档）。
+
+仓库中还包含第三方组件，各自适用不同的许可：
+
+  * praatsauce-master/ 与 scripts/ 中的上游 PraatSauce 脚本
+      MIT License, Copyright (c) 2024 praatsauce authors
+      见 LICENSES/PraatSauce-MIT.txt
+
+  * praat.exe（Praat 语音分析程序，未包含在本仓库中，随发布包提供）
+      GNU General Public License v3.0 or later
+      Copyright (C) 1992-2026 Paul Boersma and David Weenink
+      见 LICENSES/GPL-3.0.txt 与 THIRD-PARTY-NOTICES.md
+---------------------------------------------------------------------------
