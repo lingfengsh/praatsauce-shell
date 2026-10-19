@@ -1,19 +1,11 @@
 # ============================================================================
 # 引用信息（Citation File Format 1.2.0）
 #
-# 拿 DOI 的步骤（Zenodo + GitHub，免费）：
-#   1. 把本仓库推到 GitHub（public）。
-#   2. 登录 https://zenodo.org ，用 GitHub 账号授权。
-#   3. 右上角头像 → Settings → GitHub → 找到本仓库 → 拨到 ON。
-#   4. 回 GitHub，创建一个 Release（例如 tag v1.2）。Zenodo 会自动抓取并
-#      生成 DOI，几分钟后在本仓库的 Zenodo 页面出现 DOI 徽章。
-#   5. 把 DOI 填回本文件的 doi: 字段和 README 的徽章里。
-# 详细说明见仓库根 README 的「引用」一节。
-#
-# ⚠ 提交前请把这些占位符换成你自己的：
-#     repository-code / url  → 你的 GitHub 仓库地址
-#     authors[].name         → 你的署名（真名或笔名都行，要能对应到人）
-#     orcid（可选）           → https://orcid.org 免费注册
+# DOI 已通过 Zenodo 获取（GitHub Release 自动归档）：
+#   概念 DOI  10.5281/zenodo.23463195  → 始终指向最新版本，论文引用用这个
+#   版本 DOI  10.5281/zenodo.23463196  → 只指 v1.2.0 这一版
+# 以后发新版：在 GitHub 发布新的 Release，Zenodo 会自动归档；
+# 概念 DOI 不变，并会多出一个新的版本 DOI。
 # ============================================================================
 cff-version: 1.2.0
 message: "If you use this software in your research, please cite it as below."
@@ -25,7 +17,7 @@ abstract: >-
   发声态研究。声学计算全部由本机 Praat 完成，本程序仅负责参数配置、
   批量调度与结果呈现。
 type: software
-version: "1.2"
+version: "1.2.0"
 date-released: "2026-10-19"
 license: MIT
 
@@ -83,5 +75,7 @@ references:
     license: GPL-3.0-or-later
     url: "https://praat.org"
 
-# 拿到 Zenodo DOI 后填在这里（概念 DOI，指向所有版本）
-# doi: "10.5281/zenodo.XXXXXXX"
+# 概念 DOI：指向本项目的全部版本（最新版）
+doi: "10.5281/zenodo.23463195"
+# 本版（v1.2.0）的版本 DOI，如需精确指到这一版可改用：
+# doi: "10.5281/zenodo.23463196"

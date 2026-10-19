@@ -7,9 +7,10 @@
 源码仓库：<https://github.com/lingfengsh/praatsauce-shell>
 （`praat.exe` 不随仓库分发，配置方法见下文「准备 Praat」。）
 
-<!-- 拿到 Zenodo DOI 后，把下面这段取消注释并替换 XXXX：
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
--->
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23463195.svg)](https://doi.org/10.5281/zenodo.23463195)
+
+已归档版本：**v1.2.0**（[版本 DOI](https://doi.org/10.5281/zenodo.23463196)）。
+概念 DOI `10.5281/zenodo.23463195` 始终指向最新版本，论文引用请用它。
 
 <p align="center">
   <img src="docs/screenshots/step1.png" width="820" alt="第一步：选择声音文件">
@@ -286,7 +287,8 @@ GUI 相关的部分靠手工验收。
   title  = {PraatSauce 助手：面向中文用户的语音声学参数提取工作台},
   author = {零 \& AI},
   year   = {2026},
-  version= {1.2},
+  version= {1.2.0},
+  doi    = {10.5281/zenodo.23463195},
   note   = {MIT License},
   url    = {https://github.com/lingfengsh/praatsauce-shell}
 }
