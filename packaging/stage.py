@@ -37,6 +37,8 @@ VOWEL_REF_SRC = os.path.join(ROOT, "ps-shell", "backend", "vowel_ref.json")
 
 SAMPLES_SRC = os.path.join(ROOT, "samples")
 README_SRC = os.path.join(ROOT, "packaging", "入手简介.txt")
+# 完整使用手册：由 build_usage_doc.py 生成到 docs/，随包分发给使用者
+MANUAL_SRC = os.path.join(ROOT, "docs", "PraatSauce使用说明.docx")
 PRAAT_SRC = os.path.join(ROOT, "praat.exe")  # 仓库根自带 Praat 引擎，打包进分发根目录
 
 
@@ -113,12 +115,13 @@ WORKING_DIR_BLACKLIST = {'Resample', 'measure', 'output', '历史结果'}
 
 
 def stage_samples():
-    """示例音频：保留 samples/1、samples/2 两层结构（用户 2026-10-18 定）。
+    """示例音频：只保留 samples/1、samples/2 两个发音人目录里的 .wav（用户 2026-10-19 定）。
 
     - 1 = 女声，2 = 男声；默认「示例文件走一遍」只分析 samples/1。
     - 批量扫描是非递归的，所以默认示例目录必须指到子目录，不能指 samples 根。
-    - 只复制 wav 与同名 TextGrid（有标注才能演示「只测标注段」）；
-      measure/、output/、Resample/、历史结果 等派生物一律不带，示例应从零算一遍。
+    - **只复制 .wav**：TextGrid（标注）以及 measure/、output/、Resample/、历史结果
+      等派生物一律不带 —— 分发包里的 samples 只作「能直接跑起来」的最小原始素材，
+      不带任何人工标注或计算结果，用户按自己的数据从零体验完整流程。
     """
     dst_root = os.path.join(OUT, "samples")
     _reset_dir(dst_root)
@@ -128,16 +131,15 @@ def stage_samples():
         dirnames[:] = [d for d in dirnames
                        if d not in WORKING_DIR_BLACKLIST and not d.startswith("_bak")]
         for fn in filenames:
-            low = fn.lower()
-            if not (low.endswith(".wav") or low.endswith(".textgrid")):
-                continue  # 排除 .Pitch/.Formant/json/tsv/xlsx 等派生文件
+            if not fn.lower().endswith(".wav"):
+                continue  # 排除 .TextGrid/.Pitch/.Formant/json/tsv/xlsx 等一切非音频文件
             sp = os.path.join(dirpath, fn)
             rel = os.path.relpath(sp, SAMPLES_SRC)
             dp = os.path.join(dst_root, rel)
             os.makedirs(os.path.dirname(dp), exist_ok=True)
             shutil.copy2(sp, dp)
             count += 1
-    print("samples/ 复制完成，共 %d 个文件（1=女声 2=男声，保留子目录，不含 measure）" % count)
+    print("samples/ 复制完成，共 %d 个 .wav（1=女声 2=男声，不含 TextGrid/measure）" % count)
 
 
 def stage_ui():
@@ -215,6 +217,21 @@ def stage_readme():
         print("⚠ 找不到使用说明源文件：", README_SRC)
 
 
+def stage_manual():
+    """完整使用手册（docx）复制进分发根目录。
+
+    这是使用者唯一能离线查阅的完整文档（参数含义、结果解读、典型流程），
+    必须随包走；仅放仓库 docs/ 里等于用户拿不到。文件名与入手简介中的
+    清单保持一致，改名前先搜 packaging/入手简介.txt。
+    """
+    if os.path.exists(MANUAL_SRC):
+        dst = os.path.join(OUT, os.path.basename(MANUAL_SRC))
+        shutil.copy2(MANUAL_SRC, dst)
+        print("使用说明 docx 已复制（%.1f KB）" % (os.path.getsize(dst) / 1024.0))
+    else:
+        print("⚠ 找不到使用手册：", MANUAL_SRC)
+
+
 def stage_licenses():
     """把许可证与第三方声明复制进分发根目录。
 
@@ -267,6 +284,7 @@ if __name__ == "__main__":
     stage_ui()
     stage_vowel_ref()
     stage_readme()
+    stage_manual()
     stage_licenses()
     stage_version()
     print("\n分发包目录：", OUT)
