@@ -40,9 +40,8 @@ authors:
 #  - name: "零"
 #    orcid: "https://orcid.org/0000-0000-0000-0000"
 
-# ↓↓↓ 改成你的仓库地址 ↓↓↓
-repository-code: "https://github.com/your-name/praatsauce-shell"
-url: "https://github.com/your-name/praatsauce-shell"
+repository-code: "https://github.com/lingfengsh/praatsauce-shell"
+url: "https://github.com/lingfengsh/praatsauce-shell"
 
 keywords:
   - phonetics
